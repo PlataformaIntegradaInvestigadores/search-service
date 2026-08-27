@@ -28,7 +28,9 @@ class UpdateAuthorInformationUseCase:
             for i in range(0, total_authors, batch_size):
                 batch_authors = authors[i : i + batch_size]
                 author_retrievals = [
-                    AuthorRetrieval(author_id=author_instance.scopus_id)
+                    AuthorRetrieval(
+                        author_id=author_instance.scopus_id, response_list=True
+                    )
                     for author_instance in batch_authors
                 ]
 

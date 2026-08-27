@@ -5,5 +5,5 @@ from apps.search_engine.infrastructure.api.v1.views.coauthor_views import (
 )
 
 router = DefaultRouter()
-router.register(r"coauthors", CoAuthorsViewSet, basename="coauthors")
+router.register(r"", CoAuthorsViewSet, basename="coauthors")
 urlpatterns = router.urls

@@ -251,31 +251,6 @@ class LLMSearchService:
             self.initialize_components()
             self.__class__._initialized = True
 
-    # def initialize_components(self):
-    #     """Initialize all required models and components"""
-
-    #     try:
-    #         import spacy
-    #         if not spacy.util.is_package('en_core_web_sm'):
-    #             spacy.cli.download('en_core_web_sm')
-    #     except Exception as e:
-    #         logger.error(f"Error loading spaCy model: {e}")
-    #         raise
-
-    #     try:
-    #         # Load models
-    #         self.scibert_model = SentenceTransformer(self.scibert_model_path)
-    #         keybert_model = SentenceTransformer(self.keybert_path)
-    #         self.kw_model = KeyBERT(model=keybert_model)
-    #         self.translator = GoogleTranslator(source='auto', target='en')
-    #         self.corpus_embeddings = np.load(self.embeddings_path)
-    #         # Initialize processors and retrievers
-    #         self.query_processor = QueryProcessor(self.kw_model, self.translator, self.scibert_model)
-
-    #     except Exception as e:
-    #         logger.error(f"Error initializing components: {e}")
-    #         raise
-
     def initialize_components(self):
         """Initialize all required models and components"""
         try:
@@ -311,42 +286,6 @@ class LLMSearchService:
         except Exception as e:
             logger.error(f"Error initializing components: {e}")
             raise
-
-    # def get_corpus_from_neo4j(self) -> List[Dict]:
-    #     try:
-    #         query = """
-    #         MATCH (a:Article)
-    #         OPTIONAL MATCH (a)-[:WROTE]-(au:Author)
-    #         OPTIONAL MATCH (a)-[:BELONGS_TO]->(af:Affiliation)
-    #         OPTIONAL MATCH (a)-[:USES]->(t:Topic)
-    #         RETURN a.scopus_id as article_id,
-    #             a.title as title,
-    #             a.abstract as abstract,
-    #             a.publication_date as publication_date,
-    #             count(DISTINCT au) as author_count,
-    #             count(DISTINCT af) as affiliation_count,
-    #             collect(DISTINCT au.auth_name) as authors,
-    #             collect(DISTINCT af.name) as affiliations,
-    #             collect(DISTINCT t.name) as topics
-    #         """
-
-    #         results, meta = db.cypher_query(query)
-    #         return pd.DataFrame([{
-    #             'article_id': row[0],
-    #             'title': row[1] or '',
-    #             'abstract': row[2] or '',
-    #             'publication_date': row[3] or '',
-    #             'author_count': row[4],
-    #             'affiliation_count': row[5],
-    #             'authors': row[6],
-    #             'affiliations': row[7],
-    #             'topics': row[8],
-    #             'content': f"{row[1] or ''} {row[2] or ''} {' '.join(row[8])}"
-    #         } for row in results])
-
-    #     except Exception as e:
-    #         logger.error(f"Error retrieving corpus from Neo4j: {e}")
-    #         raise
 
     def get_corpus_from_neo4j(self, limit: int = None) -> pd.DataFrame:
         try:
@@ -393,64 +332,6 @@ class LLMSearchService:
         except Exception as e:
             logger.error(f"Error retrieving corpus from Neo4j: {e}")
             raise
-
-    # def search(self, query: str, top_k: int = 20) -> List[Dict]:
-    #     """
-    #     Perform semantic search using combination of BM25 and Dense Retrieval
-    #     """
-    #     try:
-
-    #         # Process query and get corpus concurrently
-    #         with ThreadPoolExecutor() as executor:
-    #             query_future = executor.submit(
-    #                 self.query_processor.process_query, query
-    #             )
-    #             corpus_future = executor.submit(self.get_corpus_from_neo4j)
-
-    #             enhanced_query, translation_time, keybert_time, keywords = query_future.result()
-    #             df = corpus_future.result()
-
-    #         # initialize retrievers with neo4j data
-    #         bm25_retriever = BM25Retriever(df)
-    #         dense_retriever = DenseRetriever(self.scibert_model, self.corpus_embeddings, df)
-
-    #          # Perform retrievals concurrently
-    #         with ThreadPoolExecutor() as executor:
-    #             bm25_future = executor.submit(
-    #                 bm25_retriever.retrieve, enhanced_query, top_k=500
-    #             )
-    #             bm25_results = bm25_future.result()
-
-    #             dense_future = executor.submit(
-    #                 dense_retriever.retrieve,
-    #                 query=enhanced_query,
-    #                 candidates=bm25_results,
-    #                 top_k=top_k
-    #             )
-    #             final_results = dense_future.result()
-
-    #         # Format results with complete Neo4j data
-    #         formatted_results = []
-    #         for i, result in enumerate(final_results, 1):
-    #             article_data = df.iloc[result['id']]
-    #             formatted_results.append({
-    #                 "rank": i,
-    #                 "title": article_data['title'],
-    #                 "abstract": article_data['abstract'],
-    #                 "publication_date": article_data['publication_date'],
-    #                 "author_count": article_data['author_count'],
-    #                 "affiliation_count": article_data['affiliation_count'],
-    #                 "authors": article_data['authors'],
-    #                 "affiliations": article_data['affiliations'],
-    #                 "relevance_score": float(result['score']),
-    #                 "article_id": str(article_data['article_id'])
-    #             })
-    #         # Log timing information
-    #         return formatted_results
-
-    #     except Exception as e:
-    #         logger.error(f"Search error: {e}")
-    #         raise
 
     def search(self, query: str, top_k: int = 20) -> list[dict]:
         """Perform semantic search using combination of BM25 and Dense Retrieval"""
