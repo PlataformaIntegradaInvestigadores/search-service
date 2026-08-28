@@ -24,6 +24,7 @@ services:
         condition: service_healthy
     volumes:
       - search_logs:/app/centinela_logs
+      - ./resources:/app/resources
     networks:
       centinela-net:
         aliases:
