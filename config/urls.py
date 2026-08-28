@@ -23,7 +23,10 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
+from config.health import health_check
+
 urlpatterns = [
+    path("health/", health_check),
     path("api-se/admin/", admin.site.urls),
     path("api-se/schema/", SpectacularAPIView.as_view(), name="schema"),
     # Optional UI for schema:
