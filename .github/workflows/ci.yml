@@ -147,7 +147,7 @@ jobs:
     steps:
       - name: Actualizar codigo
         run: |
-          cd /opt/centinela/search_engine_backend
+          cd /opt/centinela/search-service
           git fetch origin develop
           git reset --hard origin/develop
 
@@ -170,7 +170,7 @@ jobs:
           done
           if [ "$HEALTHY" = "false" ]; then
             echo "Health check fallido — rollback"
-            cd /opt/centinela/search_engine_backend && git reset --hard HEAD~1
+            cd /opt/centinela/search-service && git reset --hard HEAD~1
             cd /opt/centinela && docker compose up -d --build --no-deps search-service
             exit 1
           fi
