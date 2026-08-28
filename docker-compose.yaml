@@ -1,5 +1,5 @@
 services:
-  search_backend:
+  search-service:
     build: .
     volumes:
       - ./centinela_logs:/centinela_logs
@@ -22,16 +22,16 @@ services:
       - ADMIN_CENTINELA=${ADMIN_CENTINELA}
       - PASSWORD_CENTINELA=${PASSWORD_CENTINELA}
     depends_on:
-      neo4j:
+      search-neo4j:
         condition: service_healthy
-      mongo:
+      search-mongo:
         condition: service_healthy
     networks:
       centinela-net:
         aliases:
-          - search-engine-backend
+          - search-service
 
-  neo4j:
+  search-neo4j:
     image: neo4j:latest
     restart: unless-stopped
     ports:
@@ -57,7 +57,7 @@ services:
     networks:
       - centinela-net
 
-  mongo:
+  search-mongo:
     image: mongo:8.0
     restart: unless-stopped
     ports:

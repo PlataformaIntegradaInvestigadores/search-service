@@ -19,10 +19,13 @@ class AuthorRetrieval:
             self.url = url
         elif author_id and not url:
             self.url = self._url_base + author_id
+            params = []
             if view:
-                self.url = self.url + "&view=" + view
+                params.append("view=" + view)
             if field:
-                self.url = self.url + "&field=" + field
+                params.append("field=" + field)
+            if params:
+                self.url = self.url + "?" + "&".join(params)
         elif not url and not author_id:
             raise ValueError("You must specify either the URL or the ID.")
         else:

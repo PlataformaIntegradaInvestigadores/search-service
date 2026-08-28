@@ -7,22 +7,6 @@ with open(
     location_data = json.load(json_file)
 
 
-def process_city(city_column):
-    cities = []
-    for city_name in city_column:
-        if "," in city_name:
-            # Separar en partes por coma y quitar espacios en blanco
-            parts = [part.strip() for part in city_name.rsplit(",", 1)]
-            city = parts[-1], parts[0]
-            cities.append(city)
-        else:
-            cities.append(city_name)
-    provinces = []
-    for processed_city in cities:
-        provinces = find_province(processed_city)
-    return provinces
-
-
 def find_province(city_name):
     if city_name is None:
         return -1, "Pendiente"

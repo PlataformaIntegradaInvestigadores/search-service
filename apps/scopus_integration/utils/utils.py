@@ -213,16 +213,16 @@ def author_to_scopus_search(author):
         newAuthorDict["author-url"] = item["author-url"]
         newAuthorDict["authid"] = item["@auid"]
         newAuthorDict["authname"] = (
-            item["ce:indexed-name"] if "ce:indexed-name" in item else np.nan,
+            item["ce:indexed-name"] if "ce:indexed-name" in item else np.nan
         )
         newAuthorDict["surname"] = (
-            item["ce:surname"] if "ce:surname" in item else np.nan,
+            item["ce:surname"] if "ce:surname" in item else np.nan
         )
         newAuthorDict["given-name"] = (
-            item["ce:given-name"] if "ce:given-name" in item else np.nan,
+            item["ce:given-name"] if "ce:given-name" in item else np.nan
         )
         newAuthorDict["initials"] = (
-            item["ce:initials"] if "ce:initials" in item else np.nan,
+            item["ce:initials"] if "ce:initials" in item else np.nan
         )
         if "affiliation" in item:
             if type(item["affiliation"]) is list:

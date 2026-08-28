@@ -101,32 +101,3 @@ class ProvinceViews(viewsets.ModelViewSet):
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-
-# class ProvinceViews(viewsets.ModelViewSet):
-#     province_service = ProvinceService()
-#
-#     @action(detail=False, methods=['get'])
-#     def get_provinces(self, request):
-#         provinces_use_case = ProvincesUseCase(province_service=self.province_service)
-#         data_provinces = provinces_use_case.execute()
-#         serializer = ProvinceSerializer(data_provinces, many=True)
-#         response = serializer.data
-#         return Response(response)
-#
-#     @action(detail=False, methods=['get'])
-#     def get_provinces_year(self, request):
-#         year = (request.query_params.get('year'))
-#         year_use_case = ProvincesYearUseCase(province_service=self.province_service)
-#         year_data = year_use_case.execute(year=year)
-#         serializer = ProvinceYearSerializer(year_data, many=True)
-#         response = serializer.data
-#         return Response(response)
-#
-#     @action(detail=False, methods=['get'])
-#     def get_provinces_acumulated(self, request):
-#         year = (request.query_params.get('year'))
-#         year_use_case = ProvincesAcumulatedUseCase(province_service=self.province_service)
-#         year_data = year_use_case.execute(year=year)
-#         serializer = ProvinceAcumulatedSerializer(year_data, many=True)
-#         response = serializer.data
-#         return Response(response)

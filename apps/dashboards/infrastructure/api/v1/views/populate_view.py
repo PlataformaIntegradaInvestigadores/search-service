@@ -36,11 +36,3 @@ class PopulateView(APIView):
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-
-# class PopulateView(APIView):
-#     populate_service = PopulateService()
-#
-#     def post(self, request):
-#         populate_use_case = PopulateUseCase(populate_service=self.populate_service)
-#         populate_use_case.execute()
-#         return Response({'message': 'datalake populated'})

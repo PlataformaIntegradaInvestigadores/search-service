@@ -116,7 +116,7 @@ class Author(DjangoNode):
                     current_aff = ip_doc.get("afdispname", "")
             else:
                 preferred_name = ip_doc.get("preferred-name", {})
-                if isinstance(current_affiliation, dict):
+                if isinstance(preferred_name, dict):
                     current_aff = preferred_name.get("$", "")
                 else:
                     current_aff = ip_doc.get("afdispname", "")

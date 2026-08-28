@@ -38,17 +38,6 @@ class ArticleViewSet(viewsets.ViewSet):
 
     # Inject the service
     article_service = ArticleService()
-    _llm_search_service = None
-
-    @property
-    def llm_search_service(self):
-        # Instanciacion perezosa: LLMSearchService carga modelos SciBERT/KeyBERT
-        # pesados. Si esto se hace a nivel de clase (import time), cualquier
-        # test que cargue el urlconf completo (via Django test client) crashea
-        # aunque no toque este endpoint.
-        if ArticleViewSet._llm_search_service is None:
-            ArticleViewSet._llm_search_service = LLMSearchService()
-        return ArticleViewSet._llm_search_service
 
     @extend_schema(
         description="List all articles",
@@ -157,36 +146,6 @@ class ArticleViewSet(viewsets.ViewSet):
         request=MostRelevantArticlesRequestSerializer,
         summary="Get most relevant articles by topic",
     )
-    # @action(detail=False, methods=['post'], url_path='most-relevant-articles-by-topic')
-    # def most_relevant_articles_by_topic(self, request, *args, **kwargs):
-    #     try:
-    #         serializer = MostRelevantArticlesRequestSerializer(data=request.data)
-    #         serializer.is_valid(raise_exception=True)
-    #         topic = serializer.validated_data.get('query')
-    #         page = int(serializer.validated_data.get('page'))
-    #         size = int(serializer.validated_data.get('size'))
-    #         custom_type = serializer.validated_data.get('type')
-    #         custom_years = serializer.validated_data.get('years')
-
-    #         most_relevant_articles_usecase = MostRelevantArticlesUseCase(article_repository=self.article_service)
-    #         df, years = most_relevant_articles_usecase.execute(topic, page, size)
-    #         df = [str(article) for article in df]
-    #         if custom_type:
-    #             filtered_articles = self.article_service.find_articles_by_filter_years(custom_type, custom_years,
-    #                                                                                    df)
-    #             filtered_ids = [f"{article.scopus_id}" for article in filtered_articles]
-    #             articles, total_articles = self.article_service.find_articles_by_ids(filtered_ids, page, size)
-
-    #         else:
-    #             articles, total_articles = self.article_service.find_articles_by_ids(df, page, size)
-    #         article_serializer = MostRelevantArticleResponseSerializer(articles, many=True)
-
-    #         years_data = [int(year.split("-")[0]) for year in years]
-    #         return Response(
-    #             {'data': article_serializer.data, 'years': set(years_data), 'total': total_articles},
-    #             status=status.HTTP_200_OK)
-    #     except Exception as e:
-    #         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     @action(detail=False, methods=["post"], url_path="most-relevant-articles-by-topic")
     def most_relevant_articles_by_topic(self, request, *args, **kwargs):
         try:

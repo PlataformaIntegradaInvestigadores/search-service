@@ -36,14 +36,6 @@ class AuthorService(AuthorRepository):
         except Exception as e:
             raise ValueError(f"Error finding total authors: {e}")
 
-    # def find_most_relevant_authors_by_topic(self, topic: str, authors_number: int):
-    #     try:
-    #         m = Model("author")
-    #         authors = m.get_most_relevant_docs_by_topic_v2(topic, authors_number)
-    #         return authors
-    #     except Exception as e:
-    #         raise Exception(f"Error finding most relevant authors by topic: {e}")
-
     def find_most_relevant_authors_by_topic(self, topic: str, authors_number: int):
         try:
             m = Model("author")

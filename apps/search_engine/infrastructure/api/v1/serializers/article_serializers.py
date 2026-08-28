@@ -37,21 +37,6 @@ class MostRelevantArticlesRequestSerializer(serializers.Serializer):
     years = serializers.ListField(child=serializers.CharField(), required=False)
 
 
-# En article_serializers.py
-# class MostRelevantArticleResponseSerializer(serializers.Serializer):
-#     title = serializers.CharField()
-#     author_count = serializers.IntegerField()
-#     affiliation_count = serializers.IntegerField()
-#     publication_date = serializers.CharField()
-#     scopus_id = serializers.CharField()
-#     relevance = serializers.FloatField()
-#     authors = serializers.ListField(child=serializers.CharField(), required=False)
-#     affiliations = serializers.ListField(child=serializers.CharField(), required=False)
-
-#     def get_affiliation_count(self, obj):
-#         return len(obj.affiliations.all())
-
-
 class MostRelevantArticleResponseSerializer(serializers.Serializer):
     title = serializers.CharField()
     author_count = serializers.IntegerField(min_value=0)  # Asegurar que acepte cero
@@ -74,22 +59,3 @@ class MostRelevantArticleResponseSerializer(serializers.Serializer):
         data["author_count"] = max(0, int(instance.get("author_count", 0)))
         data["affiliation_count"] = max(0, int(instance.get("affiliation_count", 0)))
         return data
-
-
-class YearsSerializer(serializers.Serializer):
-    year = serializers.CharField()
-
-    def get_year(self, obj):
-        return obj.year.split("-")[0]
-
-    def to_representation(self, instance):
-        date_str = self.validated_data["year"]
-        year = date_str.split("-")[0]
-
-        return {"year": year}
-
-
-class MostRelevantArticlesResponseSerializer(serializers.Serializer):
-    data = MostRelevantArticleResponseSerializer(many=True)
-    years = YearsSerializer(many=True)
-    total = serializers.IntegerField()

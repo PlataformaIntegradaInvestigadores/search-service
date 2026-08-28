@@ -158,6 +158,8 @@ class SearchAffiliationRepository:
                             logger.error(f"Error on cursor creation: {e}")
                             raise e
 
+            return self.results
+
         except requests.HTTPError as e:
             logger.error(f"Error on search due to HTTP error: {e}")
             raise e
