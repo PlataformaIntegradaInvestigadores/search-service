@@ -2,7 +2,7 @@
 # docker compose --env-file .env_produccion -f docker-compose_produccion.yaml up -d
 
 services:
-  search_backend:
+  search-service:
     build: .
     restart: unless-stopped
     security_opt:
@@ -13,23 +13,23 @@ services:
       - path: .env_produccion
         required: false
     environment:
-      - NEO4J_HOST=neo4j
+      - NEO4J_HOST=search-neo4j
       - NEO4J_PORT=7687
-      - MONGO_DB_HOST=mongo
+      - MONGO_DB_HOST=search-mongo
       - MONGO_DB_PORT=27017
     depends_on:
-      neo4j:
+      search-neo4j:
         condition: service_healthy
-      mongo:
+      search-mongo:
         condition: service_healthy
     volumes:
       - search_logs:/app/centinela_logs
     networks:
       centinela-net:
         aliases:
-          - search-engine-backend
+          - search-service
 
-  neo4j:
+  search-neo4j:
     image: neo4j:5.18
     restart: unless-stopped
     expose:
@@ -57,7 +57,7 @@ services:
         aliases:
           - search-neo4j
 
-  mongo:
+  search-mongo:
     image: mongo:7.0
     restart: unless-stopped
     expose:

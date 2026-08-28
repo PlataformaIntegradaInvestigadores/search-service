@@ -1,8 +1,8 @@
-# Centinela — search_engine_backend
+# Centinela — search-service
 
 Servicio Django que implementa el motor de búsqueda de la plataforma: grafo de autores/afiliaciones/artículos/coautorías sobre Neo4j, integración con la API de Scopus, procesamiento de texto (TF-IDF, embeddings) y dashboards analíticos. Incluye además una búsqueda semántica basada en LLM (`llm-search`, stack SciBERT + KeyBERT + BM25) independiente del motor por grafo.
 
-Parte del org multi-repo `PlataformaIntegradaInvestigadores`. Se comunica con el resto de la plataforma a través de `api-gateway` (nginx), en la red Docker `centinela-net`. Es el único backend que usa dos bases de datos a la vez (Neo4j + MongoDB).
+Parte del org multi-repo `PlataformaIntegradaInvestigadores`. Se comunica con el resto de la plataforma a través de `gateway-service` (nginx), en la red Docker `centinela-net`. Es el único backend que usa dos bases de datos a la vez (Neo4j + MongoDB).
 
 ## Stack
 
@@ -58,7 +58,7 @@ apps/<app>/
 docker compose -f docker-compose.yaml up -d --build
 ```
 
-Levanta `search_backend` (Gunicorn, puerto `8001`), `neo4j` (puertos `7474`/`7687`, con plugins APOC y Graph Data Science) y `mongo` (puerto `27017`).
+Levanta `search-service` (Gunicorn, puerto `8001`), `search-neo4j` (puertos `7474`/`7687`, con plugins APOC y Graph Data Science) y `search-mongo` (puerto `27017`).
 
 ### Sin Docker (desarrollo)
 
