@@ -27,7 +27,7 @@ class CountryService(CountryRepository):
         return CountryTopicsYear.objects.get(topic_name=topic, year=year)
 
     def get_topics_acumulated_by_year(self, topic, year):
-        return CountryTopicsAcumulated.objects(topic=topic, year=year)
+        return CountryTopicsAcumulated.objects(topic_name=topic, year=year)
 
     def get_topics(self, number_top):
         return (

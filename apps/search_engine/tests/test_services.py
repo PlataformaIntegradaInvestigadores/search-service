@@ -145,6 +145,68 @@ class ArticleServiceTests(TestCase):
             with self.assertRaises(Exception):
                 self.service.find_most_relevant_articles_by_topic("ai")
 
+    def _cypher_error(self):
+        return patch(
+            "apps.search_engine.application.services.article_service.db.cypher_query",
+            side_effect=RuntimeError("db down"),
+        )
+
+    def test_find_articles_by_author_wraps_db_errors(self):
+        with self._cypher_error():
+            with self.assertRaises(Exception):
+                self.service.find_articles_by_author("1")
+
+    def test_articles_count_wraps_db_errors(self):
+        with self._cypher_error():
+            with self.assertRaises(ValueError):
+                self.service.articles_count()
+
+    def test_find_articles_by_ids_wraps_db_errors(self):
+        with self._cypher_error():
+            with self.assertRaises(Exception):
+                self.service.find_articles_by_ids(["1"])
+
+    def test_find_articles_by_filter_years_wraps_db_errors(self):
+        with self._cypher_error():
+            with self.assertRaises(Exception):
+                self.service.find_articles_by_filter_years("include", ["2024"], ["1"])
+
+    def test_find_years_by_articles_wraps_db_errors(self):
+        with self._cypher_error():
+            with self.assertRaises(Exception):
+                self.service.find_years_by_articles(["1"])
+
+    def test_bulk_create_wraps_errors(self):
+        with patch(
+            "apps.search_engine.application.services.article_service.Article.get_or_create",
+            side_effect=RuntimeError("boom"),
+        ):
+            with self.assertRaises(ValueError):
+                self.service.bulk_create([{"scopus_id": "1"}])
+
+    def test_find_total_articles_wraps_db_errors(self):
+        with self._cypher_error():
+            with self.assertRaises(ValueError):
+                self.service.find_total_articles()
+
+    def test_find_all_wraps_db_errors(self):
+        with self._cypher_error():
+            with self.assertRaises(Exception):
+                self.service.find_all()
+
+    def test_update_wraps_errors(self):
+        with patch(
+            "apps.search_engine.application.services.article_service.Article.create_or_update",
+            side_effect=RuntimeError("boom"),
+        ):
+            with self.assertRaises(Exception):
+                self.service.update({"scopus_id": "1"})
+
+    def test_find_authors_by_article_wraps_db_errors(self):
+        with self._cypher_error():
+            with self.assertRaises(Exception):
+                self.service.find_authors_by_article("1")
+
 
 class AuthorServiceTests(TestCase):
     def setUp(self):
@@ -182,6 +244,55 @@ class AuthorServiceTests(TestCase):
     def test_save_and_update_are_noop(self):
         self.assertIsNone(self.service.save(None))
         self.assertIsNone(self.service.update(None))
+
+    def _cypher_error(self):
+        return patch(
+            "apps.search_engine.application.services.author_service.db.cypher_query",
+            side_effect=RuntimeError("db down"),
+        )
+
+    def test_authors_no_updated_wraps_db_errors(self):
+        with self._cypher_error():
+            with self.assertRaises(ValueError):
+                self.service.authors_no_updated()
+
+    def test_get_authors_no_updated_count_wraps_db_errors(self):
+        with self._cypher_error():
+            with self.assertRaises(ValueError):
+                self.service.get_authors_no_updated_count()
+
+    def test_authors_count_wraps_db_errors(self):
+        with self._cypher_error():
+            with self.assertRaises(ValueError):
+                self.service.authors_count()
+
+    def test_find_authors_by_affiliation_filter_wraps_db_errors(self):
+        with self._cypher_error():
+            with self.assertRaises(Exception):
+                self.service.find_authors_by_affiliation_filter(
+                    "include", ["1"], ["2"]
+                )
+
+    def test_find_all_wraps_db_errors(self):
+        with self._cypher_error():
+            with self.assertRaises(Exception):
+                self.service.find_all(page_size=5, page=1)
+
+    def test_find_by_id_wraps_errors(self):
+        with patch(
+            "apps.search_engine.application.services.author_service.Author"
+        ) as mock_author:
+            mock_author.nodes.get.side_effect = RuntimeError("boom")
+            with self.assertRaises(Exception):
+                self.service.find_by_id("1")
+
+    def test_bulk_create_wraps_errors(self):
+        with patch(
+            "apps.search_engine.application.services.author_service.Author.get_or_create",
+            side_effect=RuntimeError("boom"),
+        ):
+            with self.assertRaises(Exception):
+                self.service.bulk_create([{"scopus_id": "1"}])
 
     def test_find_authors_by_query_matches_name(self):
         unique_marker = uid()
@@ -317,6 +428,46 @@ class AffiliationServiceTests(TestCase):
         results = self.service.find_affiliations_by_authors([uid()])
         self.assertEqual(results, [])
 
+    def test_find_affiliations_by_authors_wraps_generic_errors(self):
+        with patch(
+            "apps.search_engine.application.services.affiliation_service.Author"
+        ) as mock_author:
+            mock_author.nodes.filter.side_effect = RuntimeError("boom")
+            with self.assertRaises(Exception):
+                self.service.find_affiliations_by_authors(["1"])
+
+    def test_find_total_affiliations_wraps_db_errors(self):
+        with patch(
+            "apps.search_engine.application.services.affiliation_service.db.cypher_query",
+            side_effect=RuntimeError("boom"),
+        ):
+            with self.assertRaises(ValueError):
+                self.service.find_total_affiliations()
+
+    def test_find_by_id_wraps_errors(self):
+        with patch(
+            "apps.search_engine.application.services.affiliation_service.Affiliation"
+        ) as mock_aff:
+            mock_aff.nodes.get_or_none.side_effect = RuntimeError("boom")
+            with self.assertRaises(ValueError):
+                self.service.find_by_id("1")
+
+    def test_bulk_create_wraps_errors(self):
+        with patch(
+            "apps.search_engine.application.services.affiliation_service.Affiliation.get_or_create",
+            side_effect=RuntimeError("boom"),
+        ):
+            with self.assertRaises(ValueError):
+                self.service.bulk_create([{"scopus_id": "1"}])
+
+    def test_find_all_wraps_db_errors(self):
+        with patch(
+            "apps.search_engine.application.services.affiliation_service.db.cypher_query",
+            side_effect=RuntimeError("boom"),
+        ):
+            with self.assertRaises(ValueError):
+                self.service.find_all(page_number=1)
+
 
 class CoAuthoredServiceTests(TestCase):
     def test_find_coauthors_by_id_returns_nodes_and_links(self):
@@ -343,6 +494,15 @@ class CoAuthoredServiceTests(TestCase):
         service = CoAuthoredService(author_repository=AuthorService())
         self.assertIsNone(service.save(None))
 
+    def test_find_coauthors_by_id_wraps_generic_errors(self):
+        author_service = AuthorService()
+        service = CoAuthoredService(author_repository=author_service)
+        with patch.object(
+            author_service, "find_by_id", side_effect=RuntimeError("boom")
+        ):
+            with self.assertRaises(Exception):
+                service.find_coauthors_by_id("1")
+
 
 class TopicServiceTests(TestCase):
     def setUp(self):
@@ -363,3 +523,11 @@ class TopicServiceTests(TestCase):
         self.assertIsNone(self.service.find_by_author_id(1))
         self.assertIsNone(self.service.save(None))
         self.assertIsNone(self.service.update(None))
+
+    def test_topics_count_wraps_db_errors(self):
+        with patch(
+            "apps.search_engine.application.services.topic_service.db.cypher_query",
+            side_effect=RuntimeError("boom"),
+        ):
+            with self.assertRaises(Exception):
+                self.service.topics_count()

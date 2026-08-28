@@ -39,6 +39,17 @@ jobs:
           --health-interval 15s
           --health-timeout 10s
           --health-retries 8
+      mongo:
+        image: mongo:7.0
+        env:
+          MONGO_INITDB_ROOT_USERNAME: admin
+          MONGO_INITDB_ROOT_PASSWORD: adminpass
+        ports: ["27017:27017"]
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ping:1})' --quiet"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
@@ -47,13 +58,13 @@ jobs:
           cache: pip
       - name: Instalar dependencias
         run: pip install -q -r requirements.txt pytest pytest-django pytest-cov
-      - name: Esperar arranque de Neo4j
-        run: sleep 30
+      - name: Esperar arranque de Neo4j y MongoDB
+        run: sleep 35
       - name: Ejecutar tests unitarios
         run: |
-          pytest apps/search_engine/tests/ -v --tb=short \
+          pytest apps/ -v --tb=short \
             --junitxml=report-unit.xml \
-            --cov=apps --cov-report=term --cov-report=xml:coverage-unit.xml
+            --cov=apps --cov-report=term --cov-report=xml:coverage-unit.xml --cov-fail-under=90
       - name: Subir resultados
         uses: actions/upload-artifact@v7
         if: always()
