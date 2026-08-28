@@ -18,50 +18,10 @@ env:
   DEBUG: "True"
 
 jobs:
-  # ── Unitarios ────────────────────────────────────────────────────────────
-  test-unit:
-    name: Pruebas unitarias
+  # ── Tests ──────────────────────────────────────────────────────────────────
+  test:
+    name: Pruebas unitarias e integración
     runs-on: ubuntu-latest
-    services:
-      neo4j:
-        image: neo4j:5.18
-        env:
-          NEO4J_AUTH: neo4j/testpassword
-        ports: ["7474:7474", "7687:7687"]
-        options: >-
-          --health-cmd "wget -q --spider http://localhost:7474 || exit 1"
-          --health-interval 15s
-          --health-timeout 10s
-          --health-retries 8
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: pip
-      - name: Instalar dependencias
-        run: pip install -q -r requirements.txt pytest pytest-django pytest-cov
-      - name: Esperar arranque de Neo4j
-        run: sleep 30
-      - name: Ejecutar tests unitarios
-        run: |
-          pytest apps/search_engine/tests/ -v --tb=short \
-            --junitxml=report-unit-prod.xml \
-            --cov=apps --cov-report=term --cov-report=xml:coverage-unit-prod.xml
-      - name: Subir resultados
-        uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: unit-test-results-prod
-          path: |
-            report-unit-prod.xml
-            coverage-unit-prod.xml
-
-  # ── Integración ────────────────────────────────────────────────────────────
-  test-integration:
-    name: Pruebas de integración
-    runs-on: ubuntu-latest
-    needs: test-unit
     services:
       neo4j:
         image: neo4j:5.18
@@ -94,6 +54,11 @@ jobs:
         run: pip install -q -r requirements.txt pytest pytest-django pytest-cov
       - name: Esperar arranque de Neo4j y MongoDB
         run: sleep 35
+      - name: Ejecutar tests unitarios
+        run: |
+          pytest apps/search_engine/tests/ -v --tb=short \
+            --junitxml=report-unit-prod.xml \
+            --cov=apps --cov-report=term --cov-report=xml:coverage-unit-prod.xml
       - name: Ejecutar tests de integración
         run: |
           pytest apps/ -v --tb=short -m integration \
@@ -103,8 +68,10 @@ jobs:
         uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: integration-test-results-prod
+          name: test-results-prod
           path: |
+            report-unit-prod.xml
+            coverage-unit-prod.xml
             report-integration-prod.xml
             coverage-integration-prod.xml
 
@@ -112,7 +79,7 @@ jobs:
   deploy-production:
     name: Deploy a servidor producción
     runs-on: [self-hosted, production]
-    needs: test-integration
+    needs: test
     steps:
       - name: Actualizar código
         run: |
