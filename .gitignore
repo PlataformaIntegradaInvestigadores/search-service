@@ -32,6 +32,7 @@ hf_cache/
 
 # Agent configuration (local only, not committed)
 AGENTS.md
+.claude/
 
 # Artefactos de tests locales
 .coverage
