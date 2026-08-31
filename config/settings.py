@@ -182,6 +182,12 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "This project contains the API for the Search Engine project and Scoopus Integration project.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    # Recorta el prefijo interno del spec y lo reemplaza por la ruta publica
+    # detras del gateway (nginx.conf: /api/search/ -> /api-se/), para que
+    # "Try it out" en Swagger UI pegue a la URL real.
+    "SCHEMA_PATH_PREFIX": "/api-se",
+    "SCHEMA_PATH_PREFIX_TRIM": True,
+    "SERVERS": [{"url": "/api/search", "description": "Gateway"}],
 }
 
 MIDDLEWARE = [
