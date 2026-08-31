@@ -83,6 +83,10 @@ Ver `.env.example`. Variables clave:
 | `X_ELS_APIKEY` / `X_ELS_INSTTOKEN` / `X_ELS_AUTHTOKEN` | Credenciales de la API de Scopus |
 | `ADMIN_CENTINELA` / `PASSWORD_CENTINELA` | Superusuario inicial |
 
+## Documentación (Swagger)
+
+Schema OpenAPI: `GET /api-se/schema/?format=json`. UI local propia en `/api-se/schema/swagger-ui/` (y Redoc en `/api-se/schema/redoc/`), además disponible centralizada en el hub del `gateway-service`: `/api/docs/v1/search`. `SPECTACULAR_SETTINGS` recorta el prefijo interno `/api-se` y declara `servers: [{"url": "/api/search"}]` para que "Try it out" funcione a través del gateway.
+
 ## Tests
 
 ```bash
