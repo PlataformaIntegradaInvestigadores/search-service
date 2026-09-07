@@ -137,13 +137,13 @@ wait_for_databases() {
   [[ -n "$mongo_user" ]] || fail "MONGO_DB_USERNAME is required"
   [[ -n "$mongo_password" ]] || fail "MONGO_DB_PASSWORD is required"
 
-  wait_for "Neo4j" 60 compose_exec neo4j cypher-shell -u "$neo4j_user" -p "$neo4j_password" "RETURN 1"
-  wait_for "MongoDB" 60 compose_exec mongo mongosh --quiet --username "$mongo_user" --password "$mongo_password" --authenticationDatabase admin --eval 'db.runCommand({ ping: 1 }).ok'
+  wait_for "Neo4j" 60 compose_exec search-neo4j cypher-shell -u "$neo4j_user" -p "$neo4j_password" "RETURN 1"
+  wait_for "MongoDB" 60 compose_exec search-mongo mongosh --quiet --username "$mongo_user" --password "$mongo_password" --authenticationDatabase admin --eval 'db.runCommand({ ping: 1 }).ok'
 }
 
 load_neo4j() {
   local neo4j_container neo4j_user neo4j_password
-  neo4j_container="$(container_id neo4j)"
+  neo4j_container="$(container_id search-neo4j)"
   neo4j_user="$(env_value NEO4J_USERNAME neo4j)"
   neo4j_password="$(env_value NEO4J_PASSWORD)"
 
@@ -153,7 +153,7 @@ load_neo4j() {
   docker cp "$SEED_DIR/backup.json" "$neo4j_container:/var/lib/neo4j/import/backup.json"
 
   log "creating Neo4j constraints"
-  compose_exec neo4j cypher-shell -u "$neo4j_user" -p "$neo4j_password" <<'CYPHER'
+  compose_exec search-neo4j cypher-shell -u "$neo4j_user" -p "$neo4j_password" <<'CYPHER'
 CREATE CONSTRAINT constraint_unique_Affiliation_name IF NOT EXISTS FOR (n:Affiliation) REQUIRE n.name IS UNIQUE;
 CREATE CONSTRAINT constraint_unique_Affiliation_pk IF NOT EXISTS FOR (n:Affiliation) REQUIRE n.pk IS UNIQUE;
 CREATE CONSTRAINT constraint_unique_Affiliation_scopus_id IF NOT EXISTS FOR (n:Affiliation) REQUIRE n.scopus_id IS UNIQUE;
@@ -172,7 +172,7 @@ CREATE CONSTRAINT IF NOT EXISTS FOR (n:CursorReference) REQUIRE n.neo4jImportId 
 CYPHER
 
   log "importing Neo4j data"
-  compose_exec neo4j cypher-shell -u "$neo4j_user" -p "$neo4j_password" <<'CYPHER'
+  compose_exec search-neo4j cypher-shell -u "$neo4j_user" -p "$neo4j_password" <<'CYPHER'
 CALL apoc.import.json("backup.json", {
   createMissingNodes: true,
   batchSize: 10000
@@ -182,7 +182,7 @@ CYPHER
 
 restore_mongo() {
   local mongo_container mongo_user mongo_password mongo_db
-  mongo_container="$(container_id mongo)"
+  mongo_container="$(container_id search-mongo)"
   mongo_user="$(env_value MONGO_DB_USERNAME)"
   mongo_password="$(env_value MONGO_DB_PASSWORD)"
   mongo_db="$(env_value MONGO_DB_NAME centinela)"
@@ -193,7 +193,7 @@ restore_mongo() {
   docker cp "$SEED_DIR/centinela_db" "$mongo_container:/tmp/centinela_db"
 
   log "restoring Mongo dump"
-  compose_exec mongo mongorestore \
+  compose_exec search-mongo mongorestore \
     --host localhost \
     --port 27017 \
     --username "$mongo_user" \
@@ -205,7 +205,7 @@ restore_mongo() {
 
 finish_django_setup() {
   log "running Django setup"
-  compose_exec search_backend python manage.py install_labels
+  compose_exec search-service python manage.py install_labels
 }
 
 main() {
