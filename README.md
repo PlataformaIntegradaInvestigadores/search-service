@@ -60,6 +60,15 @@ docker compose -f docker-compose.yaml up -d --build
 
 Levanta `search-service` (Gunicorn, puerto `8001`), `search-neo4j` (puertos `7474`/`7687`, con plugins APOC y Graph Data Science) y `search-mongo` (puerto `27017`).
 
+### Cargar datos (Neo4j + Mongo)
+
+El stack levanta con las DBs vacías. Con el stack ya arriba y healthy, elegí una opción:
+
+- **Si tenés `seed_data/backup.json` y `seed_data/centinela_db/`** (dump real, se consigue con el equipo — no está en el repo): corré `bash scripts/bootstrap.sh`. Restaura ambas DBs con data real.
+- **Si NO tenés esos archivos**: corré `bash scripts/seed_mock_data.sh`. Genera un grafo sintético chico (autores, artículos, afiliaciones, tópicos) directo en Neo4j y sincroniza Mongo con el mismo comando `upsert_mongo` que usa el ETL real. Sirve para desarrollar/probar sin depender de data real ni de acceso al servidor de dev.
+
+Ninguno de los dos corre solo — hay que ejecutarlos a mano después de `docker compose up`.
+
 ### Sin Docker (desarrollo)
 
 ```bash
