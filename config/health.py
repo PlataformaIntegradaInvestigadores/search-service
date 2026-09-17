@@ -44,7 +44,7 @@ def health_check(request):
         "global_status": global_status,
         "groups": [
             {
-                "group_name": "Data Stores",
+                "group_name": "Motor de Búsqueda",
                 "group_status": group_status,
                 "services": [
                     {"name": "neo4j", "status": neo4j_status},
