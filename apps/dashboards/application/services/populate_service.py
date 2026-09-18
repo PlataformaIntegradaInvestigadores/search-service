@@ -3,30 +3,50 @@ from neomodel import db
 
 from apps.dashboards.domain.entities.affiliation import Affiliation
 from apps.dashboards.domain.entities.affiliation_topics import AffiliationTopics
-from apps.dashboards.domain.entities.affiliation_topics_acumulated import AffiliationTopicsAcumulated
-from apps.dashboards.domain.entities.affiliation_topics_year import AffiliationTopicsYear
+from apps.dashboards.domain.entities.affiliation_topics_acumulated import (
+    AffiliationTopicsAcumulated,
+)
+from apps.dashboards.domain.entities.affiliation_topics_year import (
+    AffiliationTopicsYear,
+)
 from apps.dashboards.domain.entities.affiliation_year import AffiliationYear
-from apps.dashboards.domain.entities.affiliation_year_acumulated import AffiliationAcumulated
+from apps.dashboards.domain.entities.affiliation_year_acumulated import (
+    AffiliationAcumulated,
+)
 from apps.dashboards.domain.entities.author import Author
 from apps.dashboards.domain.entities.author_topics import AuthorTopics
-from apps.dashboards.domain.entities.author_topics_acumulated import AuthorTopicsAcumulated
+from apps.dashboards.domain.entities.author_topics_acumulated import (
+    AuthorTopicsAcumulated,
+)
 from apps.dashboards.domain.entities.author_topics_year import AuthorTopicsYear
 from apps.dashboards.domain.entities.author_year import AuthorYear
 from apps.dashboards.domain.entities.author_year_acumulated import AuthorAcumulated
 from apps.dashboards.domain.entities.country_acumulated import CountryAcumulated
 from apps.dashboards.domain.entities.country_topics import CountryTopics
-from apps.dashboards.domain.entities.country_topics_acumulated import CountryTopicsAcumulated
+from apps.dashboards.domain.entities.country_topics_acumulated import (
+    CountryTopicsAcumulated,
+)
 from apps.dashboards.domain.entities.country_topics_year import CountryTopicsYear
 from apps.dashboards.domain.entities.country_year import CountryYear
 from apps.dashboards.domain.entities.province import Province
 from apps.dashboards.domain.entities.province_acumulated import ProvinceAcumulated
-from apps.dashboards.domain.entities.province_topics_acumulated import ProvinceTopicsAcumulated
+from apps.dashboards.domain.entities.province_topics_acumulated import (
+    ProvinceTopicsAcumulated,
+)
 from apps.dashboards.domain.entities.province_topics_year import ProvinceTopicsYear
 from apps.dashboards.domain.entities.province_year import ProvinceYear
 from apps.dashboards.domain.repositories.populate_repository import PopulateRepository
-from apps.dashboards.utils.utils import extract_year, count_articles_per_year_author, count_articles_per_year_country, \
-    get_articles_topics_info, get_authors_info, get_affiliations_info, count_articles_per_year_affiliation, \
-    process_affiliation_name, count_province
+from apps.dashboards.utils.utils import (
+    count_articles_per_year_affiliation,
+    count_articles_per_year_author,
+    count_articles_per_year_country,
+    count_province,
+    extract_year,
+    get_affiliations_info,
+    get_articles_topics_info,
+    get_authors_info,
+    process_affiliation_name,
+)
 
 
 class PopulateService(PopulateRepository):
@@ -38,11 +58,28 @@ class PopulateService(PopulateRepository):
         self.populate_author()
 
     DASHBOARD_COLLECTIONS = [
-        Affiliation, AffiliationTopics, AffiliationTopicsAcumulated, AffiliationTopicsYear,
-        AffiliationYear, AffiliationAcumulated, Author, AuthorTopics, AuthorTopicsAcumulated,
-        AuthorTopicsYear, AuthorYear, AuthorAcumulated, CountryAcumulated, CountryTopics,
-        CountryTopicsAcumulated, CountryTopicsYear, CountryYear, Province, ProvinceAcumulated,
-        ProvinceTopicsAcumulated, ProvinceTopicsYear, ProvinceYear,
+        Affiliation,
+        AffiliationTopics,
+        AffiliationTopicsAcumulated,
+        AffiliationTopicsYear,
+        AffiliationYear,
+        AffiliationAcumulated,
+        Author,
+        AuthorTopics,
+        AuthorTopicsAcumulated,
+        AuthorTopicsYear,
+        AuthorYear,
+        AuthorAcumulated,
+        CountryAcumulated,
+        CountryTopics,
+        CountryTopicsAcumulated,
+        CountryTopicsYear,
+        CountryYear,
+        Province,
+        ProvinceAcumulated,
+        ProvinceTopicsAcumulated,
+        ProvinceTopicsYear,
+        ProvinceYear,
     ]
 
     def drop_database(self):
@@ -86,17 +123,24 @@ class PopulateService(PopulateRepository):
         provinces_list = []
 
         for province_data in provinces_data:
-            years = [{"year": year_info['year'], "num_articles": year_info['numArticles']} for year_info in
-                     province_data['years']]
+            years = [
+                {"year": year_info["year"], "num_articles": year_info["numArticles"]}
+                for year_info in province_data["years"]
+            ]
 
             topics_list = []
-            for topic_data in province_data['topics']:
-                num_articles_per_year = [{"year": year_info['year'], "num_articles": year_info['numArticles']}
-                                         for year_info in topic_data['topic_years']]
+            for topic_data in province_data["topics"]:
+                num_articles_per_year = [
+                    {
+                        "year": year_info["year"],
+                        "num_articles": year_info["numArticles"],
+                    }
+                    for year_info in topic_data["topic_years"]
+                ]
                 topic = {
-                    "topic_name": topic_data['topic'],
+                    "topic_name": topic_data["topic"],
                     "num_articles_per_year": num_articles_per_year,
-                    "total_topic_articles": topic_data['totalTopicArticles']
+                    "total_topic_articles": topic_data["totalTopicArticles"],
                 }
                 topics_list.append(topic)
 
@@ -105,7 +149,7 @@ class PopulateService(PopulateRepository):
                 "province_name": province_data["provincia"],
                 "years": years,
                 "topics": topics_list,
-                "total_articles": province_data["num_articles"]
+                "total_articles": province_data["num_articles"],
             }
 
             provinces_list.append(province_dict)
@@ -120,8 +164,7 @@ class PopulateService(PopulateRepository):
 
             # Mapear Province
             province = Province(
-                province_name=province_name,
-                total_articles=total_articles
+                province_name=province_name, total_articles=total_articles
             )
             province.save()
 
@@ -130,7 +173,7 @@ class PopulateService(PopulateRepository):
                 province_year = ProvinceYear(
                     province_name=province_name,
                     year=year_data["year"],
-                    total_articles=year_data["num_articles"]
+                    total_articles=year_data["num_articles"],
                 )
                 province_year.save()
 
@@ -141,7 +184,7 @@ class PopulateService(PopulateRepository):
                 province_acumulated = ProvinceAcumulated(
                     province_name=province_name,
                     year=year_data["year"],
-                    total_articles=acumulated_articles
+                    total_articles=acumulated_articles,
                 )
                 province_acumulated.save()
 
@@ -156,7 +199,7 @@ class PopulateService(PopulateRepository):
                         province_name=province_name,
                         topic_name=topic_name,
                         year=year,
-                        total_articles=year_data["num_articles"]
+                        total_articles=year_data["num_articles"],
                     )
                     province_topics_year.save()
 
@@ -166,14 +209,19 @@ class PopulateService(PopulateRepository):
                             province_name=province_name,
                             topic_name=topic_name,
                             year=year,
-                            total_articles=year_data["num_articles"]
+                            total_articles=year_data["num_articles"],
                         )
                         province_topics_acumulated.save()
                     else:
-                        previous_acumulated = ProvinceTopicsAcumulated.objects.filter(province_name=province_name,
-                                                                                      topic_name=topic_name,
-                                                                                      year__lt=year).order_by(
-                            '-year').first()
+                        previous_acumulated = (
+                            ProvinceTopicsAcumulated.objects.filter(
+                                province_name=province_name,
+                                topic_name=topic_name,
+                                year__lt=year,
+                            )
+                            .order_by("-year")
+                            .first()
+                        )
                         if previous_acumulated:
                             new_total = previous_acumulated.total_articles
                         else:
@@ -183,7 +231,7 @@ class PopulateService(PopulateRepository):
                             province_name=province_name,
                             topic_name=topic_name,
                             year=year,
-                            total_articles=new_total
+                            total_articles=new_total,
                         )
                         province_topics_acumulated.save()
 
@@ -208,33 +256,42 @@ class PopulateService(PopulateRepository):
 
         years = extract_year(ar_publication_dates)
 
-        authors_data = count_articles_per_year_author(au_scopus_ids, ar_scopus_ids, years, topics)
+        authors_data = count_articles_per_year_author(
+            au_scopus_ids, ar_scopus_ids, years, topics
+        )
 
         authors_list = []
 
         for author_data in authors_data:
             # Crear diccionarios para YearContribution
-            years = [{"year": year_info['year'], "num_articles": year_info['numArticles']} for year_info in
-                     author_data['years']]
+            years = [
+                {"year": year_info["year"], "num_articles": year_info["numArticles"]}
+                for year_info in author_data["years"]
+            ]
 
             # Crear diccionarios para Topic
             topics = []
-            for topic_data in author_data['topics']:
-                num_articles_per_year = [{"year": year_info['year'], "num_articles": year_info['numArticles']}
-                                         for year_info in topic_data['topic_years']]
+            for topic_data in author_data["topics"]:
+                num_articles_per_year = [
+                    {
+                        "year": year_info["year"],
+                        "num_articles": year_info["numArticles"],
+                    }
+                    for year_info in topic_data["topic_years"]
+                ]
                 topic = {
-                    "topic_name": topic_data['topic'],
+                    "topic_name": topic_data["topic"],
                     "num_articles_per_year": num_articles_per_year,
-                    "total_topic_articles": topic_data['totalTopicArticles']
+                    "total_topic_articles": topic_data["totalTopicArticles"],
                 }
                 topics.append(topic)
 
             # Crear diccionario para Author
             author_dict = {
-                "scopus_id": author_data['idScopus'],
+                "scopus_id": author_data["idScopus"],
                 "years": years,
                 "topics": topics,
-                "total_articles": author_data['totalArticles']
+                "total_articles": author_data["totalArticles"],
             }
 
             authors_list.append(author_dict)
@@ -249,10 +306,7 @@ class PopulateService(PopulateRepository):
             total_articles = author_data["total_articles"]
 
             # Mapear Author
-            author = Author(
-                scopus_id=scopus_id,
-                total_articles=total_articles
-            )
+            author = Author(scopus_id=scopus_id, total_articles=total_articles)
             author.save()
 
             # Mapear AuthorYear
@@ -260,7 +314,7 @@ class PopulateService(PopulateRepository):
                 author_year = AuthorYear(
                     scopus_id=scopus_id,
                     year=year_data["year"],
-                    total_articles=year_data["num_articles"]
+                    total_articles=year_data["num_articles"],
                 )
                 author_year.save()
 
@@ -271,7 +325,7 @@ class PopulateService(PopulateRepository):
                 author_acumulated = AuthorAcumulated(
                     scopus_id=scopus_id,
                     year=year_data["year"],
-                    total_articles=acumulated_articles
+                    total_articles=acumulated_articles,
                 )
                 author_acumulated.save()
 
@@ -289,7 +343,7 @@ class PopulateService(PopulateRepository):
                         scopus_id=scopus_id,
                         topic_name=topic_name,
                         year=year,
-                        total_articles=year_data["num_articles"]
+                        total_articles=year_data["num_articles"],
                     )
                     author_topics_year.save()
 
@@ -306,14 +360,19 @@ class PopulateService(PopulateRepository):
                             scopus_id=scopus_id,
                             topic_name=topic_name,
                             year=year,
-                            total_articles=year_data["num_articles"]
+                            total_articles=year_data["num_articles"],
                         )
                         author_topics_acumulated.save()
                     else:
-                        previous_acumulated = AuthorTopicsAcumulated.objects.filter(scopus_id=scopus_id,
-                                                                                    topic_name=topic_name,
-                                                                                    year__lt=year).order_by(
-                            '-year').first()
+                        previous_acumulated = (
+                            AuthorTopicsAcumulated.objects.filter(
+                                scopus_id=scopus_id,
+                                topic_name=topic_name,
+                                year__lt=year,
+                            )
+                            .order_by("-year")
+                            .first()
+                        )
                         if previous_acumulated:
                             new_total = previous_acumulated.total_articles
                         else:
@@ -323,7 +382,7 @@ class PopulateService(PopulateRepository):
                             scopus_id=scopus_id,
                             topic_name=topic_name,
                             year=year,
-                            total_articles=new_total
+                            total_articles=new_total,
                         )
                         author_topics_acumulated.save()
 
@@ -332,7 +391,7 @@ class PopulateService(PopulateRepository):
                 author_topic = AuthorTopics(
                     scopus_id=scopus_id,
                     topic_name=topic_name,
-                    total_articles=total_articles
+                    total_articles=total_articles,
                 )
                 author_topic.save()
 
@@ -355,22 +414,31 @@ class PopulateService(PopulateRepository):
 
         years = extract_year(ar_publication_dates)
 
-        country_data_list = count_articles_per_year_country(ar_scopus_ids, years, topics)
+        country_data_list = count_articles_per_year_country(
+            ar_scopus_ids, years, topics
+        )
 
         country_dicts = []  # Utilizar una lista para almacenar los diccionarios de país
 
         for country_data in country_data_list:
-            years_contributions = [{"year": year_info['year'], "num_articles": year_info['numArticles']} for
-                                   year_info in country_data['years']]
+            years_contributions = [
+                {"year": year_info["year"], "num_articles": year_info["numArticles"]}
+                for year_info in country_data["years"]
+            ]
 
             topics_list = []
-            for topic_data in country_data['topics']:
-                num_articles_per_year = [{"year": year_info['year'], "num_articles": year_info['numArticles']}
-                                         for year_info in topic_data['topic_years']]
+            for topic_data in country_data["topics"]:
+                num_articles_per_year = [
+                    {
+                        "year": year_info["year"],
+                        "num_articles": year_info["numArticles"],
+                    }
+                    for year_info in topic_data["topic_years"]
+                ]
                 topic = {
-                    "topic_name": topic_data['topic'],
+                    "topic_name": topic_data["topic"],
                     "num_articles_per_year": num_articles_per_year,
-                    "total_topic_articles": topic_data['totalTopicArticles']
+                    "total_topic_articles": topic_data["totalTopicArticles"],
                 }
                 topics_list.append(topic)
 
@@ -378,7 +446,7 @@ class PopulateService(PopulateRepository):
                 "name": "Ecuador",
                 "years": years_contributions,
                 "topics": topics_list,
-                "total_articles": country_data['totalArticles'],
+                "total_articles": country_data["totalArticles"],
             }
 
             country_dicts.append(country_dict)  # Agregar el diccionario a la lista
@@ -406,30 +474,39 @@ class PopulateService(PopulateRepository):
 
         years = extract_year(ar_publication_dates)
 
-        authors_data = count_articles_per_year_author(au_scopus_ids, ar_scopus_ids, years, topics)
+        authors_data = count_articles_per_year_author(
+            au_scopus_ids, ar_scopus_ids, years, topics
+        )
 
         authors_list = []
 
         for author_data in authors_data:
-            years = [{"year": year_info['year'], "num_articles": year_info['numArticles']} for year_info in
-                     author_data['years']]
+            years = [
+                {"year": year_info["year"], "num_articles": year_info["numArticles"]}
+                for year_info in author_data["years"]
+            ]
 
             topics = []
-            for topic_data in author_data['topics']:
-                num_articles_per_year = [{"year": year_info['year'], "num_articles": year_info['numArticles']}
-                                         for year_info in topic_data['topic_years']]
+            for topic_data in author_data["topics"]:
+                num_articles_per_year = [
+                    {
+                        "year": year_info["year"],
+                        "num_articles": year_info["numArticles"],
+                    }
+                    for year_info in topic_data["topic_years"]
+                ]
                 topic = {
-                    "topic_name": topic_data['topic'],
+                    "topic_name": topic_data["topic"],
                     "num_articles_per_year": num_articles_per_year,
-                    "total_topic_articles": topic_data['totalTopicArticles']
+                    "total_topic_articles": topic_data["totalTopicArticles"],
                 }
                 topics.append(topic)
 
             author_dict = {
-                "scopus_id": author_data['idScopus'],
+                "scopus_id": author_data["idScopus"],
                 "years": years,
                 "topics": topics,
-                "total_articles": author_data['totalArticles']
+                "total_articles": author_data["totalArticles"],
             }
 
             authors_list.append(author_dict)
@@ -459,34 +536,43 @@ class PopulateService(PopulateRepository):
 
         years = extract_year(ar_publication_dates)
 
-        affiliations_data = count_articles_per_year_affiliation(af_scopus_ids, af_names, ar_scopus_ids, years, topics)
+        affiliations_data = count_articles_per_year_affiliation(
+            af_scopus_ids, af_names, ar_scopus_ids, years, topics
+        )
 
         affiliations_list = []
 
         for affiliation_data in affiliations_data:
             # Crear diccionarios para YearContribution
-            years = [{"year": year_info['year'], "num_articles": year_info['numArticles']} for year_info in
-                     affiliation_data['years']]
+            years = [
+                {"year": year_info["year"], "num_articles": year_info["numArticles"]}
+                for year_info in affiliation_data["years"]
+            ]
 
             # Crear diccionarios para Topic
             topics = []
-            for topic_data in affiliation_data['topics']:
-                num_articles_per_year = [{"year": year_info['year'], "num_articles": year_info['numArticles']}
-                                         for year_info in topic_data['topic_years']]
+            for topic_data in affiliation_data["topics"]:
+                num_articles_per_year = [
+                    {
+                        "year": year_info["year"],
+                        "num_articles": year_info["numArticles"],
+                    }
+                    for year_info in topic_data["topic_years"]
+                ]
                 topic = {
-                    "topic_name": topic_data['topic'],
+                    "topic_name": topic_data["topic"],
                     "num_articles_per_year": num_articles_per_year,
-                    "total_topic_articles": topic_data['totalTopicArticles']
+                    "total_topic_articles": topic_data["totalTopicArticles"],
                 }
                 topics.append(topic)
 
             # Crear diccionario para Affiliation
             affiliation_dict = {
-                "id_affiliation": affiliation_data['idScopus'],
-                "name": affiliation_data['name'],  # Asegurarse de incluir el nombre
+                "id_affiliation": affiliation_data["idScopus"],
+                "name": affiliation_data["name"],  # Asegurarse de incluir el nombre
                 "years": years,
                 "topics": topics,
-                "total_articles": affiliation_data['totalArticles']
+                "total_articles": affiliation_data["totalArticles"],
             }
 
             affiliations_list.append(affiliation_dict)
@@ -502,66 +588,106 @@ class PopulateService(PopulateRepository):
         affiliations = self.get_country_affiliations_dict()
         for year_data in articles_topics["Articles"]["Per_year"]:
             year = int(year_data["name"])
-            total_authors = next((item["value"] for item in authors["Per_year"] if int(item["name"]) == year), 0)
-            total_affiliations = next((item["value"] for item in affiliations["Per_year"] if int(item["name"]) == year),
-                                      0)
+            total_authors = next(
+                (
+                    item["value"]
+                    for item in authors["Per_year"]
+                    if int(item["name"]) == year
+                ),
+                0,
+            )
+            total_affiliations = next(
+                (
+                    item["value"]
+                    for item in affiliations["Per_year"]
+                    if int(item["name"]) == year
+                ),
+                0,
+            )
             total_topics = next(
-                (item["value"] for item in articles_topics["Topics"]["Per_year"] if int(item["name"]) == year), 0)
+                (
+                    item["value"]
+                    for item in articles_topics["Topics"]["Per_year"]
+                    if int(item["name"]) == year
+                ),
+                0,
+            )
 
             country_year = CountryYear(
                 year=year,
                 total_authors=total_authors,
                 total_articles=year_data["value"],
                 total_affiliations=total_affiliations,
-                total_topics=total_topics
+                total_topics=total_topics,
             )
             country_year.save()
 
             # Mapeo para CountryAcumulated
         for year_data in articles_topics["Articles"]["Acumulative"]:
             year = int(year_data["name"])
-            total_authors = next((item["value"] for item in authors["Acumulative"] if int(item["name"]) == year), 0)
+            total_authors = next(
+                (
+                    item["value"]
+                    for item in authors["Acumulative"]
+                    if int(item["name"]) == year
+                ),
+                0,
+            )
             total_affiliations = next(
-                (item["value"] for item in affiliations["Acumulative"] if int(item["name"]) == year), 0)
+                (
+                    item["value"]
+                    for item in affiliations["Acumulative"]
+                    if int(item["name"]) == year
+                ),
+                0,
+            )
             total_topics = next(
-                (item["value"] for item in articles_topics["Topics"]["Acumulative"] if int(item["name"]) == year), 0)
+                (
+                    item["value"]
+                    for item in articles_topics["Topics"]["Acumulative"]
+                    if int(item["name"]) == year
+                ),
+                0,
+            )
 
             country_acumulated = CountryAcumulated(
                 year=year,
                 total_authors=total_authors,
                 total_articles=year_data["value"],
                 total_affiliations=total_affiliations,
-                total_topics=total_topics
+                total_topics=total_topics,
             )
             country_acumulated.save()
 
         for country_data in countries:
-            for topic_data in country_data['topics']:
-                for year_info in topic_data['num_articles_per_year']:
+            for topic_data in country_data["topics"]:
+                for year_info in topic_data["num_articles_per_year"]:
                     country_topic_year = CountryTopicsYear(
-                        topic_name=topic_data['topic_name'],
-                        year=year_info['year'],
-                        total_articles=year_info['num_articles']
+                        topic_name=topic_data["topic_name"],
+                        year=year_info["year"],
+                        total_articles=year_info["num_articles"],
                     )
                     country_topic_year.save()
 
         for country_data in countries:
-            for topic_data in country_data['topics']:
+            for topic_data in country_data["topics"]:
                 country_topic = CountryTopics(
-                    topic_name=topic_data['topic_name'],
-                    total_articles=topic_data['total_topic_articles']
+                    topic_name=topic_data["topic_name"],
+                    total_articles=topic_data["total_topic_articles"],
                 )
                 country_topic.save()
 
         for country_data in countries:
-            for topic_data in country_data['topics']:
+            for topic_data in country_data["topics"]:
                 accumulated_articles = 0
-                for year_info in sorted(topic_data['num_articles_per_year'], key=lambda x: x['year']):
-                    accumulated_articles += year_info['num_articles']
+                for year_info in sorted(
+                    topic_data["num_articles_per_year"], key=lambda x: x["year"]
+                ):
+                    accumulated_articles += year_info["num_articles"]
                     country_topic_acumulated = CountryTopicsAcumulated(
-                        topic_name=topic_data['topic_name'],
-                        year=year_info['year'],
-                        total_articles=accumulated_articles
+                        topic_name=topic_data["topic_name"],
+                        year=year_info["year"],
+                        total_articles=accumulated_articles,
                     )
                     country_topic_acumulated.save()
 
@@ -574,22 +700,28 @@ class PopulateService(PopulateRepository):
 
             # Mapear Affiliation
             affiliation = Affiliation(
-                scopus_id=scopus_id,
-                name=name,
-                total_articles=total_articles
+                scopus_id=scopus_id, name=name, total_articles=total_articles
             )
             affiliation.save()
 
             # Mapear AffiliationYear
             for year_data in affiliation_data["years"]:
-                total_topics_year = len({t["topic_name"] for t in affiliation_data["topics"] if
-                                         any(y["year"] == year_data["year"] for y in t["num_articles_per_year"])})
+                total_topics_year = len(
+                    {
+                        t["topic_name"]
+                        for t in affiliation_data["topics"]
+                        if any(
+                            y["year"] == year_data["year"]
+                            for y in t["num_articles_per_year"]
+                        )
+                    }
+                )
                 affiliation_year = AffiliationYear(
                     scopus_id=scopus_id,
                     name=name,
                     year=year_data["year"],
                     total_articles=year_data["num_articles"],
-                    total_topics=total_topics_year
+                    total_topics=total_topics_year,
                 )
                 affiliation_year.save()
 
@@ -598,15 +730,21 @@ class PopulateService(PopulateRepository):
             acumulated_topics = set()
             for year_data in sorted(affiliation_data["years"], key=lambda x: x["year"]):
                 acumulated_articles += year_data["num_articles"]
-                topics_this_year = {t["topic_name"] for t in affiliation_data["topics"] if
-                                    any(y["year"] == year_data["year"] for y in t["num_articles_per_year"])}
+                topics_this_year = {
+                    t["topic_name"]
+                    for t in affiliation_data["topics"]
+                    if any(
+                        y["year"] == year_data["year"]
+                        for y in t["num_articles_per_year"]
+                    )
+                }
                 acumulated_topics.update(topics_this_year)
                 affiliation_acumulated = AffiliationAcumulated(
                     scopus_id=scopus_id,
                     name=name,
                     year=year_data["year"],
                     total_articles=acumulated_articles,
-                    total_topics=len(acumulated_topics)
+                    total_topics=len(acumulated_topics),
                 )
                 affiliation_acumulated.save()
 
@@ -614,7 +752,6 @@ class PopulateService(PopulateRepository):
             topic_totals = {}
             for topic_data in affiliation_data["topics"]:
                 topic_name = topic_data["topic_name"]
-                counted_topics = set()
                 acumulated_topic_articles = 0
 
                 for year_data in topic_data["num_articles_per_year"]:
@@ -626,7 +763,7 @@ class PopulateService(PopulateRepository):
                         name=name,
                         topic_name=topic_name,
                         year=year,
-                        total_articles=year_data["num_articles"]
+                        total_articles=year_data["num_articles"],
                     )
                     affiliation_topics_year.save()
                     acumulated_topic_articles += year_data["num_articles"]
@@ -648,7 +785,7 @@ class PopulateService(PopulateRepository):
                         name=name,
                         topic_name=topic_name,
                         year=year,
-                        total_articles=acumulated_topic_articles
+                        total_articles=acumulated_topic_articles,
                     )
                     affiliation_topics_acumulated.save()
 
@@ -663,7 +800,7 @@ class PopulateService(PopulateRepository):
                     scopus_id=scopus_id,
                     name=name,
                     topic_name=topic_name,
-                    total_articles=topic_totals[topic_name]
+                    total_articles=topic_totals[topic_name],
                 )
                 affiliation_topics.save()
 
@@ -703,34 +840,43 @@ class PopulateService(PopulateRepository):
 
         years = extract_year(ar_publication_dates)
 
-        affiliations_data = count_articles_per_year_affiliation(af_scopus_ids, af_names, ar_scopus_ids, years, topics)
+        affiliations_data = count_articles_per_year_affiliation(
+            af_scopus_ids, af_names, ar_scopus_ids, years, topics
+        )
 
         affiliations_list = []
 
         for affiliation_data in affiliations_data:
             # Crear diccionarios para YearContribution
-            years = [{"year": year_info['year'], "num_articles": year_info['numArticles']} for year_info in
-                     affiliation_data['years']]
+            years = [
+                {"year": year_info["year"], "num_articles": year_info["numArticles"]}
+                for year_info in affiliation_data["years"]
+            ]
 
             # Crear diccionarios para Topic
             topics = []
-            for topic_data in affiliation_data['topics']:
-                num_articles_per_year = [{"year": year_info['year'], "num_articles": year_info['numArticles']}
-                                         for year_info in topic_data['topic_years']]
+            for topic_data in affiliation_data["topics"]:
+                num_articles_per_year = [
+                    {
+                        "year": year_info["year"],
+                        "num_articles": year_info["numArticles"],
+                    }
+                    for year_info in topic_data["topic_years"]
+                ]
                 topic = {
-                    "topic_name": topic_data['topic'],
+                    "topic_name": topic_data["topic"],
                     "num_articles_per_year": num_articles_per_year,
-                    "total_topic_articles": topic_data['totalTopicArticles']
+                    "total_topic_articles": topic_data["totalTopicArticles"],
                 }
                 topics.append(topic)
 
             # Crear diccionario para Affiliation
             affiliation_dict = {
-                "id_affiliation": affiliation_data['idScopus'],
-                "name": affiliation_data['name'],
+                "id_affiliation": affiliation_data["idScopus"],
+                "name": affiliation_data["name"],
                 "years": years,
                 "topics": topics,
-                "total_articles": affiliation_data['totalArticles']
+                "total_articles": affiliation_data["totalArticles"],
             }
 
             affiliations_list.append(affiliation_dict)

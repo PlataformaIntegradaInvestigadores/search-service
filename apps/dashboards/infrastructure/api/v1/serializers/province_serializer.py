@@ -6,4 +6,4 @@ from apps.dashboards.domain.entities.province import Province
 class ProvinceSerializer(DocumentSerializer):
     class Meta:
         model = Province
-        fields = '__all__'
+        fields = "__all__"

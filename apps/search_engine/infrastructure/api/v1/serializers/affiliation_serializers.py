@@ -14,9 +14,9 @@ class AffiliationNameSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        ret['scopusId'] = ret.pop('scopus_id')
+        ret["scopusId"] = ret.pop("scopus_id")
         return ret
 
     def to_internal_value(self, data):
-        data['scopus_id'] = data.pop('scopusId', None)
+        data["scopus_id"] = data.pop("scopusId", None)
         return super().to_internal_value(data)

@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List
 
 
 class TopicRepository(ABC):
@@ -8,11 +7,11 @@ class TopicRepository(ABC):
         pass
 
     @abstractmethod
-    def find_by_article_id(self, article_id) -> List[object]:
+    def find_by_article_id(self, article_id) -> list[object]:
         pass
 
     @abstractmethod
-    def find_by_author_id(self, author_id) -> List[object]:
+    def find_by_author_id(self, author_id) -> list[object]:
         pass
 
     @abstractmethod
@@ -24,7 +23,7 @@ class TopicRepository(ABC):
         pass
 
     @abstractmethod
-    def find_all(self) -> List[object]:
+    def find_all(self) -> list[object]:
         pass
 
     @abstractmethod

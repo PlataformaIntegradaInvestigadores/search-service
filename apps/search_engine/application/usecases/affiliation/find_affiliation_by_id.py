@@ -1,4 +1,6 @@
-from apps.search_engine.domain.repositories.affiliation_repository import AffiliationRepository
+from apps.search_engine.domain.repositories.affiliation_repository import (
+    AffiliationRepository,
+)
 
 
 class FindAffiliationByScopusIdIUseCase:

@@ -22,7 +22,9 @@ class CountryAcumulatedEndpointIntegrationTests(APITestCase):
         CountryAcumulated.drop_collection()
 
     def test_get_acumulated_returns_stored_document(self):
-        response = self.client.get("/api-se/v1/dashboard/country/get_acumulated/", {"year": 2023})
+        response = self.client.get(
+            "/api-se/v1/dashboard/country/get_acumulated/", {"year": 2023}
+        )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["author"], 100)
@@ -31,7 +33,9 @@ class CountryAcumulatedEndpointIntegrationTests(APITestCase):
         self.assertEqual(response.data["topic"], 30)
 
     def test_get_acumulated_for_missing_year_returns_500_with_error(self):
-        response = self.client.get("/api-se/v1/dashboard/country/get_acumulated/", {"year": 1999})
+        response = self.client.get(
+            "/api-se/v1/dashboard/country/get_acumulated/", {"year": 1999}
+        )
 
         self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
         self.assertIn("error", response.data)

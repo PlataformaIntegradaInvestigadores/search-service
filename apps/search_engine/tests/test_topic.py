@@ -1,5 +1,6 @@
 from neomodel import DoesNotExist
 from rest_framework.test import APITestCase
+
 from apps.search_engine.domain.entities.topic import Topic
 
 
@@ -8,7 +9,7 @@ class TopicTestCase(APITestCase):
         self.topic = Topic.from_json(topic="Test Topic2")
 
     def test_topic_name(self):
-        self.assertEqual(self.topic.name, 'test topic2')
+        self.assertEqual(self.topic.name, "test topic2")
 
     def test_search_topic(self):
         topic = Topic.nodes.get(name="test topic2")

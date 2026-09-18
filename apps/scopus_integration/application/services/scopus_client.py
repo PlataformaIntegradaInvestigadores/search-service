@@ -1,3 +1,4 @@
+import json
 import os
 import time
 
@@ -5,7 +6,6 @@ import requests
 from dotenv import load_dotenv
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
-import json
 
 # Load environment variables
 
@@ -19,9 +19,9 @@ class ScopusClient:
 
     def __init__(self):
         self._status_msg = ""
-        self.x_els_api_key = os.environ.get('X_ELS_APIKEY')
-        self.x_els_ins_token = os.environ.get('X_ELS_INSTTOKEN')
-        self.x_els_auth_token = os.environ.get('X_ELS_AUTHTOKEN')
+        self.x_els_api_key = os.environ.get("X_ELS_APIKEY")
+        self.x_els_ins_token = os.environ.get("X_ELS_INSTTOKEN")
+        self.x_els_auth_token = os.environ.get("X_ELS_AUTHTOKEN")
 
     def exec_request(self, url: str):
         try:
@@ -29,10 +29,7 @@ class ScopusClient:
             if interval < self.__min_req_interval:
                 time.sleep(self.__min_req_interval - interval)
 
-            headers = {
-                "X-ELS-APIKey": self.x_els_api_key,
-                "Accept": 'application/json'
-            }
+            headers = {"X-ELS-APIKey": self.x_els_api_key, "Accept": "application/json"}
 
             if self.x_els_auth_token:
                 headers["X-ELS-Authtoken"] = self.x_els_auth_token
@@ -42,17 +39,14 @@ class ScopusClient:
             session = requests.Session()
             retry = Retry(connect=10, backoff_factor=0.5)
             adapter = HTTPAdapter(max_retries=retry)
-            session.mount('http://', adapter)
-            session.mount('https://', adapter)
+            session.mount("http://", adapter)
+            session.mount("https://", adapter)
 
-            r = session.get(
-                url,
-                headers=headers
-            )
+            r = session.get(url, headers=headers)
             self.__ts_last_req = time.time()
             self._status_code = r.status_code
             if r.status_code == 200:
-                self._status_msg = 'Data fetched successfully.'
+                self._status_msg = "Data fetched successfully."
                 return json.loads(r.text)
             else:
                 error_message = f"HTTP {r.status_code}: {r.text}"
@@ -63,4 +57,4 @@ class ScopusClient:
         except requests.HTTPError as e:
             raise e
         except Exception as e:
-            raise Exception(f'Error executing request: {e}')
+            raise Exception(f"Error executing request: {e}")

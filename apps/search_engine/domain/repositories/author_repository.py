@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List
 
 
 class AuthorRepository(ABC):
@@ -8,7 +7,7 @@ class AuthorRepository(ABC):
         pass
 
     @abstractmethod
-    def find_all(self, page_size=None, page=None) -> (List[object], int):
+    def find_all(self, page_size=None, page=None) -> (list[object], int):
         pass
 
     @abstractmethod
@@ -20,20 +19,23 @@ class AuthorRepository(ABC):
         pass
 
     @abstractmethod
-    def bulk_create(self, authors: List[object]) -> List[object]:
+    def bulk_create(self, authors: list[object]) -> list[object]:
         pass
 
     @abstractmethod
-    def find_authors_by_query(self, name: str, page_size=None, page=None) -> List[object]:
+    def find_authors_by_query(
+        self, name: str, page_size=None, page=None
+    ) -> list[object]:
         pass
 
     @abstractmethod
-    def find_authors_by_affiliation_filter(self, filter_type: str, affiliations_ids: List[str],
-                                           authors_ids: List[str]) -> List[object]:
+    def find_authors_by_affiliation_filter(
+        self, filter_type: str, affiliations_ids: list[str], authors_ids: list[str]
+    ) -> list[object]:
         pass
 
     @abstractmethod
-    def find_community(self, authors_ids: List[str]):
+    def find_community(self, authors_ids: list[str]):
         pass
 
     @abstractmethod
@@ -49,5 +51,5 @@ class AuthorRepository(ABC):
         pass
 
     @abstractmethod
-    def authors_no_updated(self) -> List[object]:
+    def authors_no_updated(self) -> list[object]:
         pass

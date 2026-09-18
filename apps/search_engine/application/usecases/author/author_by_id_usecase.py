@@ -1,4 +1,3 @@
-from apps.search_engine.application.services.author_service import AuthorService
 from apps.search_engine.domain.repositories.author_repository import AuthorRepository
 
 

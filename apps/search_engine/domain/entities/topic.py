@@ -1,14 +1,15 @@
-from django_neomodel import DjangoNode
-from neomodel import StructuredNode, StringProperty, RelationshipFrom
-from unidecode import unidecode
 import re
+
+from django_neomodel import DjangoNode
+from neomodel import StringProperty
+from unidecode import unidecode
 
 
 class Topic(DjangoNode):
     name = StringProperty(unique_index=True)
 
     class Meta:
-        app_label = 'search_engine'
+        app_label = "search_engine"
 
     @classmethod
     def from_json(cls, topic):
@@ -24,5 +25,5 @@ class Topic(DjangoNode):
         topic = topic.lower()
         topic = unidecode(topic)
         topic = topic.strip()
-        topic = re.sub(r'[^a-zA-Z0-9\s]', '', topic)
+        topic = re.sub(r"[^a-zA-Z0-9\s]", "", topic)
         return topic

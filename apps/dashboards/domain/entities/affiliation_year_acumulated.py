@@ -7,4 +7,3 @@ class AffiliationAcumulated(Document):
     year = fields.IntField()
     total_articles = fields.IntField()
     total_topics = fields.IntField()
-

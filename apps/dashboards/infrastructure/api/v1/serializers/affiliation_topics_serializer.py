@@ -6,4 +6,4 @@ from apps.dashboards.domain.entities.affiliation_topics import AffiliationTopics
 class AffiliationTopicsSerializer(DocumentSerializer):
     class Meta:
         model = AffiliationTopics
-        fields = '__all__'
+        fields = "__all__"

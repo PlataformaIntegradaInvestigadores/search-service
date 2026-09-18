@@ -11,7 +11,10 @@ from apps.search_engine.application.usecases.article.most_relevant_articles_by_t
 class MostRelevantArticlesUseCaseTest(TestCase):
     def setUp(self) -> None:
         self.repository = Mock()
-        self.repository.find_years_by_articles.return_value = ["2024-01-01", "2023-01-01"]
+        self.repository.find_years_by_articles.return_value = [
+            "2024-01-01",
+            "2023-01-01",
+        ]
         self.use_case = MostRelevantArticlesUseCase(self.repository)
 
     def test_accepts_enriched_article_list_from_current_repository(self) -> None:

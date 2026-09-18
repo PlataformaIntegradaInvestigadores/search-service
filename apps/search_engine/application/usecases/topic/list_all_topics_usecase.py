@@ -1,4 +1,3 @@
-from apps.search_engine.application.services.topic_service import TopicService
 from apps.search_engine.domain.repositories.topic_repository import TopicRepository
 
 

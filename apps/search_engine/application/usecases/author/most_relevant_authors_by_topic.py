@@ -1,6 +1,3 @@
-from typing import List
-
-from apps.search_engine.domain.entities.article import Article
 from apps.search_engine.domain.repositories.author_repository import AuthorRepository
 
 
@@ -9,4 +6,6 @@ class MostRelevantAuthorsByTopicUseCase:
         self.repository = repository
 
     def execute(self, topic: str, authors_number: int):
-        return self.repository.find_most_relevant_authors_by_topic(topic, authors_number)
+        return self.repository.find_most_relevant_authors_by_topic(
+            topic, authors_number
+        )

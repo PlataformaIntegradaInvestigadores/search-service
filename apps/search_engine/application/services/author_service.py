@@ -1,16 +1,15 @@
-from typing import List
 import pandas as pd
-from neomodel import db, Q
+from neomodel import Q, db
+from unidecode import unidecode
 
+from apps.search_engine.application.utils.tfidf import Model
 from apps.search_engine.domain.entities.author import Author
 from apps.search_engine.domain.repositories.author_repository import AuthorRepository
-from unidecode import unidecode
-from apps.search_engine.application.utils.tfidf import Model
 
 
 class AuthorService(AuthorRepository):
 
-    def authors_no_updated(self) -> List[object]:
+    def authors_no_updated(self) -> list[object]:
         try:
             query = "MATCH (a:Author) WHERE a.updated = false RETURN a"
             results, meta = db.cypher_query(query)
@@ -37,31 +36,25 @@ class AuthorService(AuthorRepository):
         except Exception as e:
             raise ValueError(f"Error finding total authors: {e}")
 
-    # def find_most_relevant_authors_by_topic(self, topic: str, authors_number: int):
-    #     try:
-    #         m = Model("author")
-    #         authors = m.get_most_relevant_docs_by_topic_v2(topic, authors_number)
-    #         return authors
-    #     except Exception as e:
-    #         raise Exception(f"Error finding most relevant authors by topic: {e}")
-
     def find_most_relevant_authors_by_topic(self, topic: str, authors_number: int):
         try:
             m = Model("author")
-            
+
             # Primero intentar con la query completa
             authors = m.get_most_relevant_docs_by_topic_v2(topic, authors_number)
-            
+
             # Si no hay resultados, intentar con términos individuales
             if authors.empty:
                 terms = topic.split()
                 all_authors = []
-                
+
                 for term in terms:
-                    term_authors = m.get_most_relevant_docs_by_topic_v2(term, authors_number)
+                    term_authors = m.get_most_relevant_docs_by_topic_v2(
+                        term, authors_number
+                    )
                     if not term_authors.empty:
                         all_authors.append(term_authors)
-                
+
                 if all_authors:
                     # Combinar resultados de términos individuales
                     combined = pd.concat(all_authors)
@@ -69,17 +62,17 @@ class AuthorService(AuthorRepository):
                     combined = combined.groupby(combined.index).sum()
                     # Ordenar y limitar
                     authors = combined.sort_values(ascending=False).head(authors_number)
-            
+
             return authors
-            
+
         except Exception as e:
             raise Exception(f"Error finding most relevant authors by topic: {e}")
-    
-    def find_community(self, authors_ids: List[str]):
+
+    def find_community(self, authors_ids: list[str]):
         try:
             query = Q(scopus_id__in=authors_ids)
             nodes = Author.nodes.filter(query)
-            auth_list_str = ', '.join([f'"{w}"' for w in authors_ids])
+            auth_list_str = ", ".join([f'"{w}"' for w in authors_ids])
             # Consulta para obtener enlaces
 
             query_links = f"""
@@ -94,29 +87,35 @@ class AuthorService(AuthorRepository):
             result_links, meta = result
             links = result_links[0][0]
 
-            return {"nodes": nodes, "links": links, "size_nodes": len(nodes), "size_links": len(links)}
+            return {
+                "nodes": nodes,
+                "links": links,
+                "size_nodes": len(nodes),
+                "size_links": len(links),
+            }
         except Exception as e:
             raise Exception(f"Error finding community: {e}")
 
-    def find_authors_by_affiliation_filter(self, filter_type: str, affiliations_ids: List[str],
-                                           authors_ids: List[str]) -> List[object]:
+    def find_authors_by_affiliation_filter(
+        self, filter_type: str, affiliations_ids: list[str], authors_ids: list[str]
+    ) -> list[object]:
         try:
-            print('Filter type: ', filter_type)
-            print('Affiliations IDs: ', affiliations_ids)
-            print('Authors IDs: ', authors_ids)
+            print("Filter type: ", filter_type)
+            print("Affiliations IDs: ", affiliations_ids)
+            print("Authors IDs: ", authors_ids)
             authors_str = [f'"{w}"' for w in authors_ids]
             affiliations_str = [f'"{w}"' for w in affiliations_ids]
 
-            authors_ids_str = ', '.join(map(str, authors_str))
-            affiliations_ids_str = ', '.join(map(str, affiliations_str))
+            authors_ids_str = ", ".join(map(str, authors_str))
+            affiliations_ids_str = ", ".join(map(str, affiliations_str))
 
-            if filter_type == 'include':
+            if filter_type == "include":
                 query = f"""
                    MATCH (a:Author)-[:AFFILIATED_WITH]->(aff:Affiliation)
                    WHERE a.scopus_id IN [{authors_ids_str}] AND aff.scopus_id IN [{affiliations_ids_str}]
                    RETURN a
                    """
-                print('Into of include')
+                print("Into of include")
             else:
                 query = f"""
                    MATCH (a:Author)-[:AFFILIATED_WITH]->(aff:Affiliation)
@@ -134,42 +133,66 @@ class AuthorService(AuthorRepository):
         except Exception as e:
             raise Exception(f"Error finding authors by affiliation filter: {e}")
 
-    def find_authors_by_query(self, name: str, page_size=1, page=10) -> (List[object], int):
-        custom_name = unidecode(name).strip().lower()
+    def _build_diacritic_regex(self, text: str) -> str:
+        mapping = {
+            "a": "[aáäâãà]",
+            "e": "[eéëêè]",
+            "i": "[iíïîì]",
+            "o": "[oóöôõò]",
+            "u": "[uúüûù]",
+        }
+        regex_str = ""
+        base_text = unidecode(text).strip().lower()
+        for char in base_text:
+            if char in mapping:
+                regex_str += mapping[char]
+            else:
+                if char in ".^$*+?()[{\\|":
+                    regex_str += "\\" + char
+                else:
+                    regex_str += char
+        return f"(?i).*{regex_str}.*"
+
+    def find_authors_by_query(
+        self, name: str, page_size=1, page=10
+    ) -> (list[object], int):
+        custom_name = self._build_diacritic_regex(name)
         skip = (page - 1) * page_size
-        query = f"""
+
+        query_count = f"""
                 MATCH (au:Author) 
-                WHERE  toLower(au.first_name) CONTAINS '{custom_name}' or 
-                toLower(au.last_name) CONTAINS '{custom_name}' or 
-                toLower(au.first_name) + " " + toLower(au.last_name) CONTAINS '{custom_name}' or
-                toLower(au.last_name) + " " + toLower(au.first_name) CONTAINS '{custom_name}' or  
-                toLower(au.auth_name) CONTAINS '{custom_name}' or 
-                toLower(au.initials) CONTAINS '{custom_name}' or 
-                toLower(au.email) CONTAINS '{custom_name}'or 
-                au.scopus_id CONTAINS '{custom_name}'
+                WHERE  au.first_name =~ '{custom_name}' or 
+                au.last_name =~ '{custom_name}' or 
+                (au.first_name + " " + au.last_name) =~ '{custom_name}' or
+                (au.last_name + " " + au.first_name) =~ '{custom_name}' or  
+                au.auth_name =~ '{custom_name}' or 
+                au.initials =~ '{custom_name}' or 
+                au.email =~ '{custom_name}' or 
+                au.scopus_id =~ '{custom_name}'
                 RETURN count(au) as total
         """
-        results, meta = db.cypher_query(query)
-        total = results[0][0]
-        query = f"""
+        results_count, meta = db.cypher_query(query_count)
+        total = results_count[0][0]
+
+        query_fetch = f"""
                 MATCH (au:Author) 
-                WHERE  toLower(au.first_name) CONTAINS '{custom_name}' or 
-                toLower(au.last_name) CONTAINS '{custom_name}' or 
-                toLower(au.first_name) + " " + toLower(au.last_name) CONTAINS '{custom_name}' or
-                toLower(au.last_name) + " " + toLower(au.first_name) CONTAINS '{custom_name}' or  
-                toLower(au.auth_name) CONTAINS '{custom_name}' or 
-                toLower(au.initials) CONTAINS '{custom_name}' or 
-                toLower(au.email) CONTAINS '{custom_name}' or 
-                au.scopus_id CONTAINS '{custom_name}'
+                WHERE  au.first_name =~ '{custom_name}' or 
+                au.last_name =~ '{custom_name}' or 
+                (au.first_name + " " + au.last_name) =~ '{custom_name}' or
+                (au.last_name + " " + au.first_name) =~ '{custom_name}' or  
+                au.auth_name =~ '{custom_name}' or 
+                au.initials =~ '{custom_name}' or 
+                au.email =~ '{custom_name}' or 
+                au.scopus_id =~ '{custom_name}'
                 RETURN au
                 ORDER BY au.citation_count DESC
                 SKIP {skip} LIMIT {page_size}
                 """
-        results, meta = db.cypher_query(query)
-        authors = [Author.inflate(row[0]) for row in results]
+        results_fetch, meta = db.cypher_query(query_fetch)
+        authors = [Author.inflate(row[0]) for row in results_fetch]
         return authors, total
 
-    def find_all(self, page_size=None, page=None) -> List[Author]:
+    def find_all(self, page_size=None, page=None) -> list[Author]:
         try:
             skip = (page - 1) * page_size
             query = f"MATCH (a:Author) RETURN a SKIP {skip} LIMIT {page_size}"
@@ -191,7 +214,7 @@ class AuthorService(AuthorRepository):
     def update(self, author) -> Author:
         pass
 
-    def bulk_create(self, authors: List[dict]) -> List[Author]:
+    def bulk_create(self, authors: list[dict]) -> list[Author]:
         try:
             return Author.get_or_create(*authors)
         except Exception as e:

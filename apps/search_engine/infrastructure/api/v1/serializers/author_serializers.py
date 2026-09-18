@@ -1,7 +1,5 @@
 from rest_framework import serializers
 
-from apps.search_engine.domain.entities.author import Author
-
 
 class AuthorSerializer(serializers.Serializer):
     scopus_id = serializers.CharField()
@@ -41,7 +39,7 @@ class RetrieveAuthorSerializer(serializers.Serializer):
     updated = serializers.BooleanField()
 
     def get_name(self, obj):
-        return obj.first_name + ' ' + obj.last_name
+        return obj.first_name + " " + obj.last_name
 
     def get_affiliations(self, obj):
         affiliations = [affiliation.name for affiliation in obj.affiliations.all()]
@@ -61,9 +59,7 @@ class MostRelevantAuthorsRequestSerializer(serializers.Serializer):
     authors_number = serializers.IntegerField()
     type = serializers.CharField(required=False, allow_blank=True)
     affiliations = serializers.ListField(
-        required=False,
-        child=serializers.CharField(),
-        allow_empty=True
+        required=False, child=serializers.CharField(), allow_empty=True
     )
 
 

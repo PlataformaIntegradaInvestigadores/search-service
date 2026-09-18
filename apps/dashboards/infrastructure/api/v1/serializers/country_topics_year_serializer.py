@@ -6,4 +6,4 @@ from apps.dashboards.domain.entities.country_topics_year import CountryTopicsYea
 class CountryTopicsYearSerializer(DocumentSerializer):
     class Meta:
         model = CountryTopicsYear
-        fields = '__all__'
+        fields = "__all__"

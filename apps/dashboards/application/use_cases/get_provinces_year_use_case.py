@@ -2,7 +2,7 @@ from apps.dashboards.application.services.province_service import ProvinceServic
 
 
 class ProvincesYearUseCase:
-    def __init__(self, province_service:ProvinceService):
+    def __init__(self, province_service: ProvinceService):
         self.province_service = province_service
 
     def execute(self, year):

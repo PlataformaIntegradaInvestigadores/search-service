@@ -1,4 +1,6 @@
-from apps.search_engine.domain.repositories.coauthored_repository import CoAuthoredRepository
+from apps.search_engine.domain.repositories.coauthored_repository import (
+    CoAuthoredRepository,
+)
 
 
 class FindCoauthorsByIdUsecase:

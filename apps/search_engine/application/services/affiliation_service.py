@@ -1,14 +1,14 @@
-from typing import List
-
-from neomodel import db, DoesNotExist
+from neomodel import DoesNotExist, db
 
 from apps.search_engine.domain.entities.affiliation import Affiliation
 from apps.search_engine.domain.entities.author import Author
-from apps.search_engine.domain.repositories.affiliation_repository import AffiliationRepository
+from apps.search_engine.domain.repositories.affiliation_repository import (
+    AffiliationRepository,
+)
 
 
 class AffiliationService(AffiliationRepository):
-    def find_affiliations_by_authors(self, authors: List[str]) -> List[object]:
+    def find_affiliations_by_authors(self, authors: list[str]) -> list[object]:
         try:
             author_nodes = Author.nodes.filter(scopus_id__in=authors)
             affiliations = []
@@ -40,7 +40,7 @@ class AffiliationService(AffiliationRepository):
         except Exception as e:
             raise ValueError(f"Error finding affiliation: {e}")
 
-    def find_by_name(self, affiliation_name: str) -> List[object]:
+    def find_by_name(self, affiliation_name: str) -> list[object]:
         pass
 
     def save(self, affiliation: object) -> object:
@@ -49,13 +49,13 @@ class AffiliationService(AffiliationRepository):
     def update(self, affiliation: object) -> object:
         pass
 
-    def bulk_create(self, affiliations: List[dict]) -> List[object]:
+    def bulk_create(self, affiliations: list[dict]) -> list[object]:
         try:
             return Affiliation.get_or_create(*affiliations)
         except Exception as e:
             raise ValueError(f"Error creating affiliations: {e}")
 
-    def find_all(self, page_number: int = None, page_size: int = 10) -> List[object]:
+    def find_all(self, page_number: int = None, page_size: int = 10) -> list[object]:
         try:
             skip = (page_number - 1) * page_size
             query = f"MATCH (a:Affiliation) RETURN a SKIP {skip} LIMIT {page_size}"

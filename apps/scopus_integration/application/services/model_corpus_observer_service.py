@@ -10,18 +10,18 @@ class ModelCorpusObserverService:
 
     def build_corpus_path(self):
         try:
-            modelo = 'tf-idf'
-            base_path = 'resources/corpus/'
-            version = 'v10.0'
-            corpus_path = base_path + 'corpus-' + modelo + "-" + version + ".pkl"
+            modelo = "tf-idf"
+            base_path = "resources/corpus/"
+            version = "v10.0"
+            corpus_path = base_path + "corpus-" + modelo + "-" + version + ".pkl"
             self.corpus_path = corpus_path
         except Exception as e:
             raise Exception("Error building model path: " + str(e))
 
     def build_model_path(self):
         try:
-            base_path = 'resources/models/tf-idf/'
-            version = 'v10.0'
+            base_path = "resources/models/tf-idf/"
+            version = "v10.0"
             model_path = base_path + "model-" + version + ".pkl"
             self.model_path = model_path
         except Exception as e:

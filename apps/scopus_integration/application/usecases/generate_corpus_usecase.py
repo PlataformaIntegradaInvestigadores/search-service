@@ -1,4 +1,6 @@
-from apps.scopus_integration.application.services.corpus_generation_service import CorpusService
+from apps.scopus_integration.application.services.corpus_generation_service import (
+    CorpusService,
+)
 
 
 class GenerateCorpusUseCase:

@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List
 
 
 class AffiliationRepository(ABC):
@@ -8,7 +7,7 @@ class AffiliationRepository(ABC):
         pass
 
     @abstractmethod
-    def find_by_name(self, affiliation_name: str) -> List[object]:
+    def find_by_name(self, affiliation_name: str) -> list[object]:
         pass
 
     @abstractmethod
@@ -20,11 +19,11 @@ class AffiliationRepository(ABC):
         pass
 
     @abstractmethod
-    def bulk_create(self, affiliations: List[dict]) -> List[object]:
+    def bulk_create(self, affiliations: list[dict]) -> list[object]:
         pass
 
     @abstractmethod
-    def find_all(self, page_number: int = 1, page_size: int = 10) -> List[object]:
+    def find_all(self, page_number: int = 1, page_size: int = 10) -> list[object]:
         pass
 
     @abstractmethod
@@ -32,5 +31,5 @@ class AffiliationRepository(ABC):
         pass
 
     @abstractmethod
-    def find_affiliations_by_authors(self, authors: List[str]) -> List[object]:
+    def find_affiliations_by_authors(self, authors: list[str]) -> list[object]:
         pass

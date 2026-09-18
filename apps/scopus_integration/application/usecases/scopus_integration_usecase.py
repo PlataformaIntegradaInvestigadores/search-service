@@ -1,10 +1,12 @@
-from apps.scopus_integration.application.services.scopus_client import ScopusClient
-from apps.scopus_integration.domain.repositories.search_affiliations_repository import SearchAffiliationRepository
-
-from urllib.parse import quote_plus as url_encode
 import logging
+from urllib.parse import quote_plus as url_encode
 
-logger = logging.getLogger('django')
+from apps.scopus_integration.application.services.scopus_client import ScopusClient
+from apps.scopus_integration.domain.repositories.search_affiliations_repository import (
+    SearchAffiliationRepository,
+)
+
+logger = logging.getLogger("django")
 
 
 class ScopusIntegrationUseCase:
@@ -15,10 +17,12 @@ class ScopusIntegrationUseCase:
     def execute(self):
         search_type = "scopus"
         view = "COMPLETE"
-        field = ("dc:identifier,doi,dc:title,coverDate,dc:description,authkeywords,afid,affilname,"
-                 "affiliation-city,affiliation-country,authid,authname,given-name,surname,initials")
+        field = (
+            "dc:identifier,doi,dc:title,coverDate,dc:description,authkeywords,afid,affilname,"
+            "affiliation-city,affiliation-country,authid,authname,given-name,surname,initials"
+        )
         count = "25"
-        cursor = '*'
+        cursor = "*"
         query = url_encode("AFFIL(AFFILCOUNTRY(Ecuador))")
 
         # Se puede eliminar el date para extraer todos los datos desde 2024, 2010-2020
@@ -27,5 +31,7 @@ class ScopusIntegrationUseCase:
         self.search_affiliation_repository = affiliation_repository
         print("Iniciando la ejecucion de la busqueda .....")
         logger.log(logging.INFO, "Iniciando la ejecucion de la busqueda .....")
-        results = self.search_affiliation_repository.retrieve(client=self.scopus_client, get_all=True)
+        results = self.search_affiliation_repository.retrieve(
+            client=self.scopus_client, get_all=True
+        )
         logger.log(logging.INFO, f"Se encontraron {len(results)} resultados")

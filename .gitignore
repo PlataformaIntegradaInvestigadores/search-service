@@ -32,3 +32,14 @@ hf_cache/
 
 # Agent configuration (local only, not committed)
 AGENTS.md
+.claude/
+
+# Artefactos de tests locales
+.coverage
+coverage-*.xml
+report*.xml
+htmlcov/
+.venv-test/
+.venv-test-requirements.txt
+seed_data/backup.json
+seed_data/centinela_db/*

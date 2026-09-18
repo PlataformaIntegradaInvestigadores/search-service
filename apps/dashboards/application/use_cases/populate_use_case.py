@@ -2,9 +2,8 @@ from apps.dashboards.application.services.populate_service import PopulateServic
 
 
 class PopulateUseCase:
-    def __init__(self, populate_service:PopulateService):
+    def __init__(self, populate_service: PopulateService):
         self.populate_service = populate_service
 
     def execute(self):
         return self.populate_service.populate()
-

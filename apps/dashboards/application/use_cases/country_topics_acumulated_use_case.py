@@ -6,4 +6,6 @@ class CountryTopicsAcumulatedUseCase:
         self.country_service = country_service
 
     def execute(self, topic, year):
-        return self.country_service.get_topics_acumulated_by_year(topic=topic, year=year)
+        return self.country_service.get_topics_acumulated_by_year(
+            topic=topic, year=year
+        )

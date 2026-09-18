@@ -7,7 +7,9 @@ class MostRelevantArticlesUseCase:
     def __init__(self, article_repository: ArticleRepository):
         self.article_repository = article_repository
 
-    def execute(self, topic: str, page: int, size: int) -> tuple[list[dict[str, Any]], list[object]]:
+    def execute(
+        self, topic: str, page: int, size: int
+    ) -> tuple[list[dict[str, Any]], list[object]]:
         """Normalize both the current repository result and the legacy Series."""
         results = self.article_repository.find_most_relevant_articles_by_topic(topic)
         ranked_articles: list[dict[str, Any]] = []

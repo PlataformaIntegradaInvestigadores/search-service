@@ -32,11 +32,20 @@ neo4j_db/
 mongo_db/
 hf_cache/
 
+# Modelos ML y embeddings pesados: se montan como volumen en runtime
+# (ver docker-compose_produccion.yaml), no van dentro de la imagen.
+resources/
+
 # Entorno virtual
 venv/
 env/
 .venv/
+.venv-test/
 .env/
+
+# CI y linter, no necesarios en runtime
+.github/
+.ruff_cache/
 
 # Archivos de log
 *.log

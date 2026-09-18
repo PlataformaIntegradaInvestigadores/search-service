@@ -18,15 +18,15 @@ class RetrieveScopusData:
     def __init__(self):
         self.custom_request = CustomRequest(self.BASE_URL, self.HEADERS)
 
-    def retrieve_data(self)-> dict:
+    def retrieve_data(self) -> dict:
         endpoint = ""
         params = {
             "query": "AFFIL(AFFILCOUNTRY(Ecuador))",
             "count": 25,
             "view": "COMPLETE",
             "field": "dc:identifier,doi,dc:title,coverDate,dc:description,authkeywords,afid,affilname,"
-                     "affiliation-city,affiliation-country,authid,authname,given-name,surname,initials",
-            "cursor": "*"
+            "affiliation-city,affiliation-country,authid,authname,given-name,surname,initials",
+            "cursor": "*",
         }
 
         try:

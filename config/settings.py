@@ -9,11 +9,12 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
+
 import os
+from pathlib import Path
 
 import mongoengine
 from dotenv import load_dotenv
-from pathlib import Path
 from neomodel import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,43 +27,49 @@ load_dotenv()
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get(
-    'DJANGO_SECRET_KEY',
-    'django-insecure-bcxlgJx4w_PJ2ZU_7fFDLCJI-YRIsu_wynL_Yd62euGaQ77hEmcoBDbnL_JWFee2BEY',
+    "DJANGO_SECRET_KEY",
+    "django-insecure-bcxlgJx4w_PJ2ZU_7fFDLCJI-YRIsu_wynL_Yd62euGaQ77hEmcoBDbnL_JWFee2BEY",
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG') == 'True'
+DEBUG = os.environ.get("DEBUG") == "True"
 
 ALLOWED_HOSTS = [
-    host.strip() for host in os.environ.get('ALLOWED_HOSTS', '*').split(',') if host.strip()
+    host.strip()
+    for host in os.environ.get("ALLOWED_HOSTS", "*").split(",")
+    if host.strip()
 ]
 
-CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000", ]
+CSRF_TRUSTED_ORIGINS = [
+    "http://127.0.0.1:8000",
+]
 CORS_ORIGIN_ALLOW_ALL = True
 
 # Connect to Neo4j database
-neo4j_username = os.environ.get('NEO4J_USERNAME')
-neo4j_password = os.environ.get('NEO4J_PASSWORD')
-neo4j_host = os.environ.get('NEO4J_HOST')
-neo4j_port = os.environ.get('NEO4J_PORT')
-neo4j_scheme = os.environ.get('NEO4J_SCHEME')
+neo4j_username = os.environ.get("NEO4J_USERNAME")
+neo4j_password = os.environ.get("NEO4J_PASSWORD")
+neo4j_host = os.environ.get("NEO4J_HOST")
+neo4j_port = os.environ.get("NEO4J_PORT")
+neo4j_scheme = os.environ.get("NEO4J_SCHEME")
 
 # config.DATABASE_URL = f'bolt://{neo4j_username}:{neo4j_password}@{neo4j_host}:{neo4j_port}'
 try:
     if not neo4j_scheme:
-        neo4j_scheme = 'bolt' if DEBUG else 'bolt+s'
-    config.DATABASE_URL = f'{neo4j_scheme}://{neo4j_username}:{neo4j_password}@{neo4j_host}:{neo4j_port}'
+        neo4j_scheme = "bolt" if DEBUG else "bolt+s"
+    config.DATABASE_URL = (
+        f"{neo4j_scheme}://{neo4j_username}:{neo4j_password}@{neo4j_host}:{neo4j_port}"
+    )
 except Exception as e:
     raise ValueError(f"Error connecting to Neo4j database: {e}")
 
-mongo_db_name = os.environ.get('MONGO_DB_NAME')
-mongo_db_username = os.environ.get('MONGO_DB_USERNAME')
-mongo_db_password = os.environ.get('MONGO_DB_PASSWORD')
+mongo_db_name = os.environ.get("MONGO_DB_NAME")
+mongo_db_username = os.environ.get("MONGO_DB_USERNAME")
+mongo_db_password = os.environ.get("MONGO_DB_PASSWORD")
 mongo_host = os.environ.get("MONGO_DB_HOST")
 mongo_port = os.environ.get("MONGO_DB_PORT")
-mongo_auth_source = os.environ.get('MONGO_AUTH_SOURCE', 'admin')
+mongo_auth_source = os.environ.get("MONGO_AUTH_SOURCE", "admin")
 
-mongo_uri = f'mongodb://{mongo_db_username}:{mongo_db_password}@{mongo_host}:{mongo_port}/{mongo_db_name}?authSource={mongo_auth_source}'
+mongo_uri = f"mongodb://{mongo_db_username}:{mongo_db_password}@{mongo_host}:{mongo_port}/{mongo_db_name}?authSource={mongo_auth_source}"
 # print(mongo_uri)
 mongoengine.connect(host=mongo_uri)
 # mongoengine.connect(
@@ -72,31 +79,31 @@ mongoengine.connect(host=mongo_uri)
 # bolt+s://<username>:<password>@<host>:<port>
 # Application definition
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',
-    'rest_framework_mongoengine',
-    'django_neomodel',
-    'corsheaders',
-    'drf_spectacular',
-    'apps',
-    'apps.search_engine',
-    'apps.scopus_integration',
-    'apps.dashboards',
-    'apps.authentication',
-    'apps.text_processing'
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "rest_framework",
+    "rest_framework_mongoengine",
+    "django_neomodel",
+    "corsheaders",
+    "drf_spectacular",
+    "apps",
+    "apps.search_engine",
+    "apps.scopus_integration",
+    "apps.dashboards",
+    "apps.authentication",
+    "apps.text_processing",
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,
 }
-log_dir = Path(BASE_DIR) / 'centinela_logs'
+log_dir = Path(BASE_DIR) / "centinela_logs"
 if not log_dir.exists():
     log_dir.mkdir(parents=True, exist_ok=True)
 
@@ -148,7 +155,7 @@ LOGGING = {
             "backupCount": 7,
             "formatter": "verbose",
             "encoding": "utf-8",
-            "delay": True
+            "delay": True,
         },
         "console": {
             "class": "logging.StreamHandler",
@@ -171,51 +178,56 @@ LOGGING = {
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Search Engine API',
-    'DESCRIPTION': 'This project contains the API for the Search Engine project and Scoopus Integration project.',
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
+    "TITLE": "Search Engine API",
+    "DESCRIPTION": "This project contains the API for the Search Engine project and Scoopus Integration project.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    # Recorta el prefijo interno del spec y lo reemplaza por la ruta publica
+    # detras del gateway (nginx.conf: /api/search/ -> /api-se/), para que
+    # "Try it out" en Swagger UI pegue a la URL real.
+    "SCHEMA_PATH_PREFIX": "/api-se",
+    "SCHEMA_PATH_PREFIX_TRIM": True,
+    "SERVERS": [{"url": "/api/search", "description": "Gateway"}],
 }
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'config.urls'
+ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'config.wsgi.application'
+WSGI_APPLICATION = "config.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     },
 }
 
@@ -224,25 +236,25 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -251,169 +263,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-# """
-# Django settings for config project.
-#
-# Generated by 'django-admin startproject' using Django 5.0.6.
-#
-# For more information on this file, see
-# https://docs.djangoproject.com/en/5.0/topics/settings/
-#
-# For the full list of settings and their values, see
-# https://docs.djangoproject.com/en/5.0/ref/settings/
-# """
-# import os
-#
-# import mongoengine
-# from dotenv import load_dotenv
-# from pathlib import Path
-# from neomodel import config
-#
-# # Build paths inside the project like this: BASE_DIR / 'subdir'.
-# BASE_DIR = Path(__file__).resolve().parent.parent
-#
-# # Quick-start development settings - unsuitable for production
-# # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
-# # Load environment variables
-# load_dotenv()
-#
-# # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'change-me')
-#
-# # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
-#
-# ALLOWED_HOSTS = []
-#
-# # Connect to Neo4j database
-# neo4j_username = 'neo4j'
-# neo4j_password = 'narias98'
-# neo4j_host = 'localhost'
-# neo4j_port = '7687'
-#
-# config.DATABASE_URL = f'bolt://{neo4j_username}:{neo4j_password}@{neo4j_host}:{neo4j_port}'
-# # bolt+s://<username>:<password>@<host>:<port>
-# mongoengine.connect(db="datalake")
-#
-# # Application definition
-# INSTALLED_APPS = [
-#     'django.contrib.admin',
-#     'django.contrib.auth',
-#     'django.contrib.contenttypes',
-#     'django.contrib.sessions',
-#     'django.contrib.messages',
-#     'django.contrib.staticfiles',
-#     'rest_framework',
-#     'django_neomodel',
-#     'drf_spectacular',
-#     'apps',
-#     'apps.search_engine',
-#     'apps.scopus_integration',
-#     'apps.dashboards',
-#     'corsheaders'
-# ]
-#
-# REST_FRAMEWORK = {
-#     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-#     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-#     'PAGE_SIZE': 10
-# }
-#
-# SPECTACULAR_SETTINGS = {
-#     'TITLE': 'Search Engine API',
-#     'DESCRIPTION': 'This project contains the API for the Search Engine project and Scoopus Integration project.',
-#     'VERSION': '1.0.0',
-#     'SERVE_INCLUDE_SCHEMA': False,
-# }
-#
-# MIDDLEWARE = [
-#     'corsheaders.middleware.CorsMiddleware',
-#     'django.middleware.security.SecurityMiddleware',
-#     'django.contrib.sessions.middleware.SessionMiddleware',
-#     'django.middleware.common.CommonMiddleware',
-#     'django.middleware.csrf.CsrfViewMiddleware',
-#     'django.contrib.auth.middleware.AuthenticationMiddleware',
-#     'django.contrib.messages.middleware.MessageMiddleware',
-#     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-# ]
-#
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:4200",
-#     # otros orígenes permitidos
-# ]
-#
-# ROOT_URLCONF = 'config.urls'
-#
-# TEMPLATES = [
-#     {
-#         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-#         'DIRS': [BASE_DIR / 'templates']
-#         ,
-#         'APP_DIRS': True,
-#         'OPTIONS': {
-#             'context_processors': [
-#                 'django.template.context_processors.debug',
-#                 'django.template.context_processors.request',
-#                 'django.contrib.auth.context_processors.auth',
-#                 'django.contrib.messages.context_processors.messages',
-#             ],
-#         },
-#     },
-# ]
-#
-# WSGI_APPLICATION = 'config.wsgi.application'
-#
-# # Database
-# # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-#
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     },
-# }
-#
-# # Password validation
-# # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
-#
-# AUTH_PASSWORD_VALIDATORS = [
-#     {
-#         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-#     },
-#     {
-#         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-#     },
-#     {
-#         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-#     },
-#     {
-#         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-#     },
-# ]
-#
-# # Internationalization
-# # https://docs.djangoproject.com/en/5.0/topics/i18n/
-#
-# LANGUAGE_CODE = 'en-us'
-#
-# TIME_ZONE = 'UTC'
-#
-# USE_I18N = True
-#
-# USE_TZ = True
-#
-# # Static files (CSS, JavaScript, Images)
-# # https://docs.djangoproject.com/en/5.0/howto/static-files/
-#
-# STATIC_URL = 'static/'
-#
-# # Default primary key field type
-# # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
-#
-# DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

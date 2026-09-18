@@ -1,4 +1,4 @@
-from neomodel import IntegerProperty, StructuredRel, FloatProperty
+from neomodel import FloatProperty, IntegerProperty, StructuredRel
 
 
 class CoAuthored(StructuredRel):

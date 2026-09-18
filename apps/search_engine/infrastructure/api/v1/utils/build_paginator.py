@@ -17,5 +17,5 @@ def build_pagination_urls(request, page_number, page_size, total_items):
     return {
         "has_more_items": has_more_items,
         "next_page": next_page_url,
-        "previous_page": previous_page_url
+        "previous_page": previous_page_url,
     }

@@ -10,9 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN python -m spacy download en_core_web_sm
 RUN python -c "import nltk; nltk.download('stopwords')"
 
-COPY . .
-
-RUN chown -R appuser:appuser /app
+COPY --chown=appuser:appuser . .
 
 USER appuser
 RUN python -c "from keybert import KeyBERT; KeyBERT()"

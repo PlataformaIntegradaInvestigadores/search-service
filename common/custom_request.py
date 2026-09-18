@@ -1,5 +1,6 @@
-import requests
 from typing import Any
+
+import requests
 
 
 class CustomRequest:
@@ -8,7 +9,7 @@ class CustomRequest:
         self.base_url = base_url
         self.headers = headers
 
-    def do_get(self, endpoint: str, params:dict ) -> Any:
+    def do_get(self, endpoint: str, params: dict) -> Any:
         try:
             url = self.base_url + endpoint
             response = requests.get(url, headers=self.headers, params=params)

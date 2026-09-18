@@ -7,4 +7,6 @@ class AuthorsByAffiliationsFiltersUseCase:
         self.author_repository = author_repository
 
     def execute(self, filter_type: str, affiliations_ids: list, authors_ids: list):
-        return self.author_repository.find_authors_by_affiliation_filter(filter_type, affiliations_ids, authors_ids)
+        return self.author_repository.find_authors_by_affiliation_filter(
+            filter_type, affiliations_ids, authors_ids
+        )

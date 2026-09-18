@@ -6,7 +6,9 @@ from apps.dashboards.domain.repositories.province_repository import ProvinceRepo
 
 class ProvinceService(ProvinceRepository):
     def get_provinces_acumulated(self, year):
-        return ProvinceAcumulated.objects(year=year).filter(province_name__ne="Pendiente")
+        return ProvinceAcumulated.objects(year=year).filter(
+            province_name__ne="Pendiente"
+        )
 
     def get_provinces_info(self):
         return Province.objects().filter(province_name__ne="Pendiente")

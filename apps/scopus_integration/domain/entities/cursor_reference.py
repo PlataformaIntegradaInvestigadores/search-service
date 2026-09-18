@@ -8,4 +8,4 @@ class CursorReference(DjangoNode):
     current_url = StringProperty()
 
     class Meta:
-        app_label = 'scopus_integration'
+        app_label = "scopus_integration"

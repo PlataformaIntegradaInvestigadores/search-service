@@ -1,5 +1,3 @@
-from typing import List
-
 from neomodel import db
 
 from apps.search_engine.domain.entities.topic import Topic
@@ -10,10 +8,10 @@ class TopicService(TopicRepository):
     def find_by_id(self, topic_id) -> Topic:
         pass
 
-    def find_by_article_id(self, article_id) -> List[Topic]:
+    def find_by_article_id(self, article_id) -> list[Topic]:
         pass
 
-    def find_by_author_id(self, author_id) -> List[Topic]:
+    def find_by_author_id(self, author_id) -> list[Topic]:
         pass
 
     def save(self, topic) -> Topic:

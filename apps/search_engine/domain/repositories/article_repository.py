@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple
 
 
 class ArticleRepository(ABC):
@@ -16,7 +15,7 @@ class ArticleRepository(ABC):
         pass
 
     @abstractmethod
-    def find_all(self, page_number=None, page_size=None) -> List[object]:
+    def find_all(self, page_number=None, page_size=None) -> list[object]:
         pass
 
     @abstractmethod
@@ -24,11 +23,17 @@ class ArticleRepository(ABC):
         pass
 
     @abstractmethod
-    def bulk_create(self, articles: List[dict]) -> List[object]:
+    def bulk_create(self, articles: list[dict]) -> list[object]:
         pass
 
     @abstractmethod
-    def find_articles_by_ids(self, ids: List[str], page: int = 1, page_size: int = 10, order_by_date: bool = True) -> Tuple[List[object], int]:
+    def find_articles_by_ids(
+        self,
+        ids: list[str],
+        page: int = 1,
+        page_size: int = 10,
+        order_by_date: bool = True,
+    ) -> tuple[list[object], int]:
         pass
 
     @abstractmethod
@@ -36,11 +41,13 @@ class ArticleRepository(ABC):
         pass
 
     @abstractmethod
-    def find_articles_by_filter_years(self, filter_type: str, filter_years: List[str], ids: List[str]) -> List[object]:
+    def find_articles_by_filter_years(
+        self, filter_type: str, filter_years: list[str], ids: list[str]
+    ) -> list[object]:
         pass
 
     @abstractmethod
-    def find_years_by_articles(self, ids: List[str]) -> List[object]:
+    def find_years_by_articles(self, ids: list[str]) -> list[object]:
         pass
 
     @abstractmethod
@@ -48,9 +55,9 @@ class ArticleRepository(ABC):
         pass
 
     @abstractmethod
-    def find_authors_by_article(self, article_id: str) -> List[object]:
+    def find_authors_by_article(self, article_id: str) -> list[object]:
         pass
 
     @abstractmethod
-    def find_articles_by_author(self, author_id: str) -> List[object]:
+    def find_articles_by_author(self, author_id: str) -> list[object]:
         pass

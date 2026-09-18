@@ -6,4 +6,4 @@ from apps.dashboards.domain.entities.province_acumulated import ProvinceAcumulat
 class ProvinceAcumulatedSerializer(DocumentSerializer):
     class Meta:
         model = ProvinceAcumulated
-        fields = '__all__'
+        fields = "__all__"
