@@ -2,6 +2,8 @@
 ProvinceViews, PopulateView y las 4 vistas de fairness (sirven un JSON
 pre-calculado desde disco, no recalculan nada)."""
 
+import base64
+import os
 from unittest.mock import patch
 
 from rest_framework import status
@@ -77,8 +79,7 @@ class ProvinceViewsTests(APITestCase):
 
     def test_get_provinces_error_retorna_500(self):
         with patch(
-            "apps.dashboards.application.services.province_service."
-            "Province.objects",
+            "apps.dashboards.application.services.province_service." "Province.objects",
             side_effect=Exception("boom"),
         ):
             response = self.client.get(f"{PROVINCE_BASE}get_provinces/")
@@ -89,7 +90,9 @@ class ProvinceViewsTests(APITestCase):
             province_name="Pichincha", year=2020, total_articles=4
         )
 
-        response = self.client.get(f"{PROVINCE_BASE}get_provinces_year/", {"year": 2020})
+        response = self.client.get(
+            f"{PROVINCE_BASE}get_provinces_year/", {"year": 2020}
+        )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
@@ -129,17 +132,30 @@ class ProvinceViewsTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+def _basic_auth_header(username: str, password: str) -> str:
+    raw = f"{username}:{password}".encode()
+    return "Basic " + base64.b64encode(raw).decode("ascii")
+
+
 class PopulateViewTests(APITestCase):
     def setUp(self):
         self.client = APIClient()
+        self.admin_header = _basic_auth_header("admin", "secret")
+        self.env_patcher = patch.dict(
+            os.environ, {"ADMIN_CENTINELA": "admin", "PASSWORD_CENTINELA": "secret"}
+        )
+        self.env_patcher.start()
+        self.addCleanup(self.env_patcher.stop)
 
-    def test_post_populate_ok(self):
+    def test_post_populate_ok_con_credenciales_de_admin(self):
         with patch(
             "apps.dashboards.infrastructure.api.v1.views.populate_view."
             "PopulateUseCase.execute",
             return_value=None,
         ):
-            response = self.client.post(POPULATE_URL)
+            response = self.client.post(
+                POPULATE_URL, HTTP_AUTHORIZATION=self.admin_header
+            )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["message"], "Analytics DB populated")
 
@@ -149,8 +165,33 @@ class PopulateViewTests(APITestCase):
             "PopulateUseCase.execute",
             side_effect=Exception("boom"),
         ):
-            response = self.client.post(POPULATE_URL)
+            response = self.client.post(
+                POPULATE_URL, HTTP_AUTHORIZATION=self.admin_header
+            )
         self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def test_post_populate_sin_credenciales_retorna_403(self):
+        with patch(
+            "apps.dashboards.infrastructure.api.v1.views.populate_view."
+            "PopulateUseCase.execute",
+            return_value=None,
+        ) as mock_execute:
+            response = self.client.post(POPULATE_URL)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        mock_execute.assert_not_called()
+
+    def test_post_populate_credenciales_invalidas_retorna_403(self):
+        with patch(
+            "apps.dashboards.infrastructure.api.v1.views.populate_view."
+            "PopulateUseCase.execute",
+            return_value=None,
+        ) as mock_execute:
+            response = self.client.post(
+                POPULATE_URL,
+                HTTP_AUTHORIZATION=_basic_auth_header("admin", "wrong"),
+            )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        mock_execute.assert_not_called()
 
 
 class FairnessViewsTests(APITestCase):
