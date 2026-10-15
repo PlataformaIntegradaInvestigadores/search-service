@@ -145,6 +145,25 @@ class ScopusIntegrationUseCaseTests(SimpleTestCase):
 
             mock_repo.retrieve.assert_called_once_with(client=client, get_all=True)
             self.assertIs(usecase.search_affiliation_repository, mock_repo)
+            self.assertIn("date=2010-2020", mock_repo_cls.call_args.kwargs["url"])
+
+    def test_execute_con_year_restringe_la_busqueda_a_ese_anio(self):
+        # Regresion: el rango fijo date=2010-2020 nunca traia nada mas
+        # reciente sin importar cuando se corriera. year permite pedir un
+        # solo anio por llamada en vez de una decada entera de una.
+        client = MagicMock()
+        with patch(
+            "apps.scopus_integration.application.usecases."
+            "scopus_integration_usecase.SearchAffiliationRepository"
+        ) as mock_repo_cls:
+            mock_repo = MagicMock()
+            mock_repo_cls.return_value = mock_repo
+
+            usecase = ScopusIntegrationUseCase(scopus_client=client)
+            usecase.execute(year=2024)
+
+            self.assertIn("date=2024", mock_repo_cls.call_args.kwargs["url"])
+            self.assertNotIn("date=2010-2020", mock_repo_cls.call_args.kwargs["url"])
 
 
 class UpdateAuthorInformationUseCaseTests(SimpleTestCase):
