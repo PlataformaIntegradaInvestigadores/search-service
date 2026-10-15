@@ -72,6 +72,16 @@ class CountryServiceTests(TestCase):
         CountryAcumulated.objects.create(year=2021, total_authors=1, total_articles=5)
         self.assertEqual(self.service.get_acumulated_by_year(2021).total_articles, 5)
 
+    def test_get_acumulated_by_year_survives_duplicate_docs(self):
+        # Regresion: populate() no esta protegido contra dos corridas
+        # solapadas (ej. la ventana sin auth de PopulateView antes del fix),
+        # lo que dejo docs duplicados por year en produccion. .get() explota
+        # con MultipleObjectsReturned -> 500 en el dashboard entero.
+        CountryAcumulated.objects.create(year=2023, total_authors=1, total_articles=5)
+        CountryAcumulated.objects.create(year=2023, total_authors=1, total_articles=5)
+        result = self.service.get_acumulated_by_year(2023)
+        self.assertEqual(result.total_articles, 5)
+
     def test_get_topics_by_year(self):
         CountryTopicsYear.objects.create(topic_name="IA", year=2020, total_articles=7)
         result = self.service.get_topics_by_year("IA", 2020)

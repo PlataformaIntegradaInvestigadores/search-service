@@ -8,9 +8,20 @@ from apps.dashboards.domain.entities.country_year import CountryYear
 from apps.dashboards.domain.repositories.country_repository import CountryRepository
 
 
+def _get_one(queryset):
+    """populate_service.populate() drops each collection and reinserts it in
+    one go, but isn't guarded against two overlapping runs (e.g. the
+    PopulateView unauthenticated-access window before it required admin
+    auth) -- a race there can leave duplicate docs for the same key. A plain
+    .get() raises MultipleObjectsReturned and 500s in that case; take the
+    most recently inserted doc instead so a stale duplicate never breaks a
+    dashboard panel outright."""
+    return queryset.order_by("-id").first()
+
+
 class CountryService(CountryRepository):
     def get_year_info(self, year):
-        return CountryYear.objects.get(year=year)
+        return _get_one(CountryYear.objects.filter(year=year))
 
     def get_range_info(self, year):
         return CountryYear.objects.filter(year__gt=1999, year__lte=year).order_by(
@@ -18,13 +29,15 @@ class CountryService(CountryRepository):
         )
 
     def get_year(self, year):
-        return CountryYear.objects.get(year=year)
+        return _get_one(CountryYear.objects.filter(year=year))
 
     def get_acumulated_by_year(self, year):
-        return CountryAcumulated.objects.get(year=year)
+        return _get_one(CountryAcumulated.objects.filter(year=year))
 
     def get_topics_by_year(self, topic, year):
-        return CountryTopicsYear.objects.get(topic_name=topic, year=year)
+        return _get_one(
+            CountryTopicsYear.objects.filter(topic_name=topic, year=year)
+        )
 
     def get_topics_acumulated_by_year(self, topic, year):
         return CountryTopicsAcumulated.objects(topic_name=topic, year=year)
