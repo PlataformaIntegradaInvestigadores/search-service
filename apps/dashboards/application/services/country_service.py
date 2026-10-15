@@ -13,10 +13,14 @@ def _get_one(queryset):
     one go, but isn't guarded against two overlapping runs (e.g. the
     PopulateView unauthenticated-access window before it required admin
     auth) -- a race there can leave duplicate docs for the same key. A plain
-    .get() raises MultipleObjectsReturned and 500s in that case; take the
-    most recently inserted doc instead so a stale duplicate never breaks a
-    dashboard panel outright."""
-    return queryset.order_by("-id").first()
+    .get() raises MultipleObjectsReturned in that case, same as every other
+    unexpected error -- view callers 500 either way, so only short-circuit
+    the duplicate case; a genuinely missing doc still raises DoesNotExist
+    exactly like .get() would, preserving existing "year not found" 500s."""
+    try:
+        return queryset.get()
+    except queryset._document.MultipleObjectsReturned:
+        return queryset.order_by("-id").first()
 
 
 class CountryService(CountryRepository):
