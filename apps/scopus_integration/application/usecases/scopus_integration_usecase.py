@@ -14,7 +14,7 @@ class ScopusIntegrationUseCase:
         self.scopus_client = scopus_client
         self.search_affiliation_repository = None
 
-    def execute(self):
+    def execute(self, year=None):
         search_type = "scopus"
         view = "COMPLETE"
         field = (
@@ -25,8 +25,12 @@ class ScopusIntegrationUseCase:
         cursor = "*"
         query = url_encode("AFFIL(AFFILCOUNTRY(Ecuador))")
 
-        # Se puede eliminar el date para extraer todos los datos desde 2024, 2010-2020
-        url = f"https://api.elsevier.com/content/search/{search_type}?query={query}&count={count}&view={view}&field={field}&cursor={cursor}&date=2010-2020"
+        # Un solo año por llamada (en vez del rango fijo 2010-2020 que esto
+        # reemplaza) para no traer una decada entera en un solo request: cada
+        # llamada es mas chica, mas facil de reintentar si falla, y permite
+        # ir acumulando year por year sin bloquear horas en un solo request.
+        date_range = str(year) if year else "2010-2020"
+        url = f"https://api.elsevier.com/content/search/{search_type}?query={query}&count={count}&view={view}&field={field}&cursor={cursor}&date={date_range}"
         affiliation_repository = SearchAffiliationRepository(url=url)
         self.search_affiliation_repository = affiliation_repository
         print("Iniciando la ejecucion de la busqueda .....")
