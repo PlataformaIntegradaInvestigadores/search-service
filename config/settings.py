@@ -17,6 +17,8 @@ import mongoengine
 from dotenv import load_dotenv
 from neomodel import config
 
+from config.openapi_docs import INFO_DESCRIPTION, TAGS
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -178,10 +180,17 @@ LOGGING = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Search Engine API",
-    "DESCRIPTION": "This project contains the API for the Search Engine project and Scoopus Integration project.",
+    "TITLE": "Search Engine API: corpus científico y dashboards",
+    "DESCRIPTION": INFO_DESCRIPTION,
     "VERSION": "1.0.0",
+    "TAGS": TAGS,
     "SERVE_INCLUDE_SCHEMA": False,
+    "ENUM_GENERATE_CHOICE_DESCRIPTION": False,
+    "PREPROCESSING_HOOKS": ["config.openapi_docs.exclude_unused_routes"],
+    "POSTPROCESSING_HOOKS": [
+        "drf_spectacular.hooks.postprocess_schema_enums",
+        "config.openapi_docs.organize_schema",
+    ],
     # Recorta el prefijo interno del spec y lo reemplaza por la ruta publica
     # detras del gateway (nginx.conf: /api/search/ -> /api-se/), para que
     # "Try it out" en Swagger UI pegue a la URL real.
