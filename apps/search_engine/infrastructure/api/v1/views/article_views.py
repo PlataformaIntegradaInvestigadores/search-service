@@ -29,6 +29,7 @@ from apps.search_engine.infrastructure.api.v1.serializers.article_serializers im
 from apps.search_engine.infrastructure.api.v1.utils.build_paginator import (
     build_pagination_urls,
 )
+from common.admin_permission import IsCentinelaAdmin
 
 logger = logging.getLogger("django")
 
@@ -38,6 +39,20 @@ class ArticleViewSet(viewsets.ViewSet):
 
     # Inject the service
     article_service = ArticleService()
+
+    # DELETE vacia toda la base de Neo4j (ver destroy), asi que exige las
+    # credenciales de admin. DRF's BasicAuthentication por defecto interceptaria la
+    # misma cabecera "Authorization: Basic" y la validaria contra auth_user antes de
+    # que IsCentinelaAdmin corra (mismo caso que PopulateView), por eso se omite.
+    def get_authenticators(self):
+        if self.request.method == "DELETE":
+            return []
+        return super().get_authenticators()
+
+    def get_permissions(self):
+        if self.request.method == "DELETE":
+            return [IsCentinelaAdmin()]
+        return super().get_permissions()
 
     @extend_schema(
         description="List all articles",
