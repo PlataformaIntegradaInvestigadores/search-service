@@ -21,6 +21,7 @@ from apps.search_engine.infrastructure.api.v1.views.llm_search_views import (
 )
 from apps.search_engine.infrastructure.api.v1.views.summary_views import SummaryView
 from apps.search_engine.infrastructure.api.v1.views.topic_views import TopicViewSet
+from common.admin_permission import IsCentinelaAdmin
 
 factory = APIRequestFactory()
 
@@ -98,6 +99,15 @@ class ArticleViewSetTests(APITestCase):
                 response = self._delete()
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         clear.assert_not_called()
+
+    def test_view_can_be_built_without_a_request(self):
+        # drf-spectacular instancia la vista con request=None para generar el schema.
+        view = ArticleViewSet()
+        view.request = None
+        self.assertNotEqual(view.get_authenticators(), [])
+        self.assertFalse(
+            any(isinstance(p, IsCentinelaAdmin) for p in view.get_permissions())
+        )
 
     def test_destroy_with_wrong_credentials_is_rejected(self):
         with patch.dict(

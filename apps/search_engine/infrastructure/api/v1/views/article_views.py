@@ -44,13 +44,19 @@ class ArticleViewSet(viewsets.ViewSet):
     # credenciales de admin. DRF's BasicAuthentication por defecto interceptaria la
     # misma cabecera "Authorization: Basic" y la validaria contra auth_user antes de
     # que IsCentinelaAdmin corra (mismo caso que PopulateView), por eso se omite.
+    def _is_delete(self):
+        # drf-spectacular construye la vista con request=None al generar el
+        # documento, asi que no se puede asumir que exista.
+        request = getattr(self, "request", None)
+        return request is not None and request.method == "DELETE"
+
     def get_authenticators(self):
-        if self.request.method == "DELETE":
+        if self._is_delete():
             return []
         return super().get_authenticators()
 
     def get_permissions(self):
-        if self.request.method == "DELETE":
+        if self._is_delete():
             return [IsCentinelaAdmin()]
         return super().get_permissions()
 
