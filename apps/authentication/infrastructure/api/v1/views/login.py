@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from apps.authentication.infrastructure.api.v1.serializers.login_request_serializer import (
     LoginRequestSerializer,
 )
+from common.admin_permission import admin_token_max_age, issue_admin_token
 
 load_dotenv()
 
@@ -23,7 +24,14 @@ class LoginView(APIView):
         password_centinela = os.environ.get("PASSWORD_CENTINELA")
 
         if username == admin_centinela and password == password_centinela:
-            return Response({"message": "Login Succesfull"}, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    "message": "Login Succesfull",
+                    "token": issue_admin_token(),
+                    "expires_in": admin_token_max_age(),
+                },
+                status=status.HTTP_200_OK,
+            )
         return Response(
             {"message": "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST
         )

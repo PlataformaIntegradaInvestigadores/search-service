@@ -127,9 +127,12 @@ científica. Trabaja sobre el corpus de artículos de Scopus almacenado en dos b
   de consulta del corpus paginan con `page` y `page_size`.
 * Los errores devuelven un objeto con la clave `error` (o `message` / `detail` en
   algunos endpoints).
-* Casi todas las rutas son públicas. Solo el repoblado del datalake
-  (`/dashboard/populate`) y el vaciado de la base (`DELETE /articles/{id}/`) piden
-  las credenciales de administrador por HTTP Basic.
+* Las consultas del corpus y de los dashboards son públicas.
+* Las operaciones de **administración** (ETL, repoblado, corpus y modelo, ingesta de
+  Scopus, logs y el vaciado de la base) exigen credenciales de administrador. Se
+  obtiene un token con `POST /auth/login/` y se envía en la cabecera `X-Admin-Token`
+  (botón **Authorize**); también se acepta HTTP Basic con el mismo usuario y
+  contraseña. Sin ellas responden `403`.
 * Para búsquedas con validación de contrato y formato de error uniforme, el
   frontend usa la API intermedia `/api/search/v2`.
 """
@@ -286,6 +289,14 @@ EXTRA_SCHEMAS = {
         {"error": _t(S, "Descripción del error.")}, desc="Error de la operación."
     ),
     "MessageResponse": _obj({"message": _t(S, "Mensaje del resultado.")}),
+    "AdminLoginResponse": _obj(
+        {
+            "message": _t(S, "Mensaje del resultado."),
+            "token": _t(S, "Token de administración para la cabecera `X-Admin-Token`."),
+            "expires_in": _t(I, "Segundos de vigencia del token."),
+        },
+        desc="Sesión de administración iniciada.",
+    ),
     "DetailResponse": _obj({"detail": _t(S, "Mensaje del resultado.")}),
     "SuccessResponse": _obj(
         {
@@ -795,7 +806,7 @@ op(
     "Vaciar la base de datos de Neo4j",
     "**Operación destructiva y exclusiva de administración.** Ignora el `{id}` y "
     "borra todos los nodos de la base de Neo4j. Exige las credenciales de "
-    "administrador por HTTP Basic. No se usa desde el frontend.",
+    "administrador (`X-Admin-Token` o HTTP Basic). No se usa desde el frontend.",
     None,
     status=204,
     errors=(403, 500),
@@ -1344,7 +1355,8 @@ op(
     T_ADM,
     "Repoblar el datalake de dashboards",
     "Recalcula en MongoDB todos los agregados que alimentan los dashboards a partir "
-    "de Neo4j. **Exige las credenciales de administrador** por HTTP Basic.",
+    "de Neo4j. **Exige las credenciales de administrador** (`X-Admin-Token` o HTTP "
+    "Basic).",
     ref("MessageResponse"),
     errors=(403, 500),
     admin=True,
@@ -1359,7 +1371,8 @@ op(
     "`GET /admin/etl/run/`.",
     ref("EtlStartedResponse"),
     status=202,
-    errors=(409,),
+    errors=(403, 409),
+    admin=True,
 )
 op(
     "POST",
@@ -1369,7 +1382,8 @@ op(
     "Construye el corpus de texto a partir de los artículos de Neo4j. Es el paso "
     "previo a generar el modelo.",
     ref("CorpusGeneratedResponse"),
-    errors=(400,),
+    errors=(403, 400),
+    admin=True,
 )
 op(
     "POST",
@@ -1378,7 +1392,8 @@ op(
     "Generar el modelo TF-IDF",
     "Entrena el modelo TF-IDF con el corpus generado.",
     ref("SuccessResponse"),
-    errors=(400,),
+    errors=(403, 400),
+    admin=True,
 )
 op(
     "GET",
@@ -1388,7 +1403,8 @@ op(
     "Consulta la API de Scopus e incorpora los artículos nuevos al corpus. Con "
     "`year` procesa solo ese año. Consume cuota de la API de Scopus y puede tardar.",
     ref("SuccessResponse"),
-    errors=(400,),
+    errors=(403, 400),
+    admin=True,
 )
 op(
     "POST",
@@ -1398,7 +1414,8 @@ op(
     "Actualiza la información de los autores desde Scopus. Si ya hay una "
     "actualización en curso responde 429.",
     ref("SuccessResponse"),
-    errors=(429, 400),
+    errors=(403, 429, 400),
+    admin=True,
 )
 
 # ------------------------------------------------ Administración: estado
@@ -1410,6 +1427,8 @@ op(
     "Indica si el ETL está corriendo y cómo terminó la última ejecución. El frontend "
     "lo consulta periódicamente.",
     ref("EtlStatusResponse"),
+    errors=(403,),
+    admin=True,
 )
 op(
     "GET",
@@ -1419,7 +1438,8 @@ op(
     "Devuelve líneas de log paginadas, con filtros por nivel, rango de fechas y "
     "texto.",
     ref("LogsPageResponse"),
-    errors=(400,),
+    errors=(403, 400),
+    admin=True,
 )
 op(
     "GET",
@@ -1464,11 +1484,12 @@ op(
     "POST",
     "/auth/login/",
     T_LOGIN,
-    "Validar las credenciales de administración",
-    "Comprueba el usuario y la contraseña del panel de administración contra la "
-    "configuración del servicio. **No emite token ni sesión**: solo responde si las "
-    "credenciales son correctas.",
-    ref("MessageResponse"),
+    "Iniciar sesión de administración",
+    "Valida el usuario y la contraseña del panel de administración y devuelve un "
+    "token firmado. Envíalo en la cabecera `X-Admin-Token` para usar las "
+    "operaciones de administración; vence a las `expires_in` segundos y deja de "
+    "valer si se cambian las credenciales del servicio.",
+    ref("AdminLoginResponse"),
     errors=(400,),
 )
 op(
@@ -1633,7 +1654,9 @@ def _apply(path, operation, doc):
         responses[str(code)] = _response(text, ref_name)
     operation["responses"] = responses
 
-    operation["security"] = [{"basicAuth": []}] if doc["admin"] else []
+    operation["security"] = (
+        [{"adminToken": []}, {"basicAuth": []}] if doc["admin"] else []
+    )
     if doc.get("body"):
         operation["requestBody"] = {
             "required": True,
@@ -1704,12 +1727,19 @@ def organize_schema(result, generator, request, public):
 
     result["tags"] = TAGS
     components["securitySchemes"] = {
+        "adminToken": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "X-Admin-Token",
+            "description": "Token de administración que devuelve `POST /auth/login/`. "
+            "Es el que usa el panel; dura 8 horas por defecto.",
+        },
         "basicAuth": {
             "type": "http",
             "scheme": "basic",
             "description": "Credenciales de administrador (`ADMIN_CENTINELA` / "
             "`PASSWORD_CENTINELA`).",
-        }
+        },
     }
     return result
 

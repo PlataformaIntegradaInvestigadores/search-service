@@ -6,9 +6,16 @@ from rest_framework.views import APIView
 from apps.scopus_integration.application.services.model_generation_service import (
     ModelGenerationService,
 )
+from common.admin_permission import IsCentinelaAdmin
 
 
 class GenerateModelView(APIView):
+    # Solo administracion: IsCentinelaAdmin acepta el token de LoginView o HTTP Basic;
+    # sin authentication_classes la BasicAuthentication por defecto de DRF
+    # intercepta la cabecera Authorization antes de que corra el permiso.
+    authentication_classes = []
+    permission_classes = [IsCentinelaAdmin]
+
     @extend_schema(
         summary="Generate model",
         tags=["TF-IDF"],

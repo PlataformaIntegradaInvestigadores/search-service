@@ -15,7 +15,18 @@ from config.openapi_docs import OPERATIONS, TAGS
 
 HTTP_METHODS = {"get", "post", "put", "patch", "delete"}
 SCHEMA_REF = re.compile(r"#/components/schemas/([A-Za-z0-9_]+)")
-ADMIN_OPERATIONS = {("post", "/v1/dashboard/populate"), ("delete", "/v1/articles/{id}/")}
+ADMIN_OPERATIONS = {
+    ("post", "/v1/dashboard/populate"),
+    ("delete", "/v1/articles/{id}/"),
+    ("get", "/v1/admin/etl/run/"),
+    ("post", "/v1/admin/etl/run/"),
+    ("get", "/v1/admin/logs/"),
+    ("post", "/v1/generate-corpus/"),
+    ("post", "/v1/generate-model/"),
+    ("get", "/v1/scopus-integration/"),
+    ("post", "/v1/information/update/author-information/"),
+}
+ADMIN_SECURITY = [{"adminToken": []}, {"basicAuth": []}]
 
 
 class OpenAPIDocumentationTests(SimpleTestCase):
@@ -78,11 +89,16 @@ class OpenAPIDocumentationTests(SimpleTestCase):
 
     def test_only_admin_operations_ask_for_credentials(self):
         for path, method, operation in self.operations():
-            expected = [{"basicAuth": []}] if (method, path) in ADMIN_OPERATIONS else []
+            expected = ADMIN_SECURITY if (method, path) in ADMIN_OPERATIONS else []
             self.assertEqual(operation["security"], expected, f"{method} {path}")
+            if expected:
+                self.assertIn("403", operation["responses"], f"{method} {path}")
         self.assertEqual(
-            list(self.schema["components"]["securitySchemes"]), ["basicAuth"]
+            sorted(self.schema["components"]["securitySchemes"]),
+            ["adminToken", "basicAuth"],
         )
+        scheme = self.schema["components"]["securitySchemes"]["adminToken"]
+        self.assertEqual((scheme["in"], scheme["name"]), ("header", "X-Admin-Token"))
 
     def test_every_response_is_described_and_success_has_a_schema(self):
         for path, method, operation in self.operations():

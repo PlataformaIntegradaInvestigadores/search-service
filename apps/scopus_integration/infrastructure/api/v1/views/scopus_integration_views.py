@@ -13,11 +13,18 @@ from apps.scopus_integration.application.services.scopus_client import ScopusCli
 from apps.scopus_integration.application.usecases.scopus_integration_usecase import (
     ScopusIntegrationUseCase,
 )
+from common.admin_permission import IsCentinelaAdmin
 
 logger = logging.getLogger("django")
 
 
 class ScopusIntegrationViewSet(viewsets.ModelViewSet):
+    # Solo administracion: IsCentinelaAdmin acepta el token de LoginView o HTTP Basic;
+    # sin authentication_classes la BasicAuthentication por defecto de DRF
+    # intercepta la cabecera Authorization antes de que corra el permiso.
+    authentication_classes = []
+    permission_classes = [IsCentinelaAdmin]
+
     lock = threading.Lock()
     scopus_client = ScopusClient()
 
