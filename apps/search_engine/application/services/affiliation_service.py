@@ -58,8 +58,10 @@ class AffiliationService(AffiliationRepository):
     def find_all(self, page_number: int = None, page_size: int = 10) -> list[object]:
         try:
             skip = (page_number - 1) * page_size
-            query = f"MATCH (a:Affiliation) RETURN a SKIP {skip} LIMIT {page_size}"
-            results, meta = db.cypher_query(query)
+            query = "MATCH (a:Affiliation) RETURN a SKIP $skip LIMIT $limit"
+            results, meta = db.cypher_query(
+                query, {"skip": int(skip), "limit": int(page_size)}
+            )
             affiliations = [Affiliation.inflate(row[0]) for row in results]
             return affiliations
         except Exception as e:

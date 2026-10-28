@@ -37,15 +37,19 @@ class ArticleService(ArticleRepository):
             ids_integer = [str(w) for w in ids]
 
             # Obtener total de artículos
-            query_to_find_articles = f"MATCH (a:Article) WHERE a.scopus_id IN {ids_integer} RETURN count(a) AS total"
-            total_results, meta = db.cypher_query(query_to_find_articles)
+            query_to_find_articles = (
+                "MATCH (a:Article) WHERE a.scopus_id IN $ids RETURN count(a) AS total"
+            )
+            total_results, meta = db.cypher_query(
+                query_to_find_articles, {"ids": ids_integer}
+            )
             total_articles = total_results[0][0]
 
             # Obtener artículos con toda su información
             order_clause = "ORDER BY a.publication_date DESC" if order_by_date else ""
             query = f"""
                 MATCH (a:Article) 
-                WHERE a.scopus_id IN {ids_integer} 
+                WHERE a.scopus_id IN $ids 
                 OPTIONAL MATCH (a)-[:WROTE]-(au:Author)
                 OPTIONAL MATCH (a)-[:BELONGS_TO]-(aff:Affiliation)
                 RETURN a, 
@@ -54,10 +58,13 @@ class ArticleService(ArticleRepository):
                     collect(DISTINCT au.auth_name) as authors,
                     collect(DISTINCT aff.name) as affiliations
                 {order_clause}
-                SKIP {skip} LIMIT {page_size}
+                SKIP $skip LIMIT $limit
             """
 
-            results, meta = db.cypher_query(query)
+            results, meta = db.cypher_query(
+                query,
+                {"ids": ids_integer, "skip": int(skip), "limit": int(page_size)},
+            )
 
             # Procesar resultados
             articles = []
@@ -93,25 +100,27 @@ class ArticleService(ArticleRepository):
         try:
             # Cambiar este cmportamiento dependiendo de la bd
 
-            ids = [f'"{str(w)}"' for w in ids]
-            ids_str = ", ".join(map(str, ids))
-            filter_years_str = " OR ".join(
-                [f'a.publication_date CONTAINS "{year}"' for year in filter_years]
-            )
-
             if filter_type == "include":
-                query = f"""
+                query = """
                 MATCH (a:Article)
-                WHERE a.scopus_id IN [{ids_str}] AND ({filter_years_str})
+                WHERE a.scopus_id IN $ids
+                  AND any(y IN $years WHERE a.publication_date CONTAINS y)
                 RETURN a
                 """
             else:
-                query = f"""
+                query = """
                 MATCH (a:Article)
-                WHERE a.scopus_id IN [{ids_str}] AND NOT ({filter_years_str})
+                WHERE a.scopus_id IN $ids
+                  AND NOT any(y IN $years WHERE a.publication_date CONTAINS y)
                 RETURN a
                 """
-            results, _ = db.cypher_query(query)
+            results, _ = db.cypher_query(
+                query,
+                {
+                    "ids": [str(w) for w in ids],
+                    "years": [str(y) for y in filter_years],
+                },
+            )
             articles = [Article.inflate(row[0]) for row in results]
             return articles
         except Exception as e:
@@ -120,8 +129,8 @@ class ArticleService(ArticleRepository):
     def find_years_by_articles(self, ids: list[str]) -> list[object]:
         try:
             # Comment
-            query = f"MATCH (a:Article) WHERE a.scopus_id IN {ids} RETURN a"
-            results, meta = db.cypher_query(query)
+            query = "MATCH (a:Article) WHERE a.scopus_id IN $ids RETURN a"
+            results, meta = db.cypher_query(query, {"ids": [str(w) for w in ids]})
             articles = [Article.inflate(row[0]) for row in results]
             years = []
             for article in articles:
@@ -148,8 +157,10 @@ class ArticleService(ArticleRepository):
     def find_all(self, page_number=1, page_size=10) -> list[Article]:
         try:
             skip = (page_number - 1) * page_size
-            query = f"MATCH (a:Article) RETURN a SKIP {skip} LIMIT {page_size}"
-            results, meta = db.cypher_query(query)
+            query = "MATCH (a:Article) RETURN a SKIP $skip LIMIT $limit"
+            results, meta = db.cypher_query(
+                query, {"skip": int(skip), "limit": int(page_size)}
+            )
             articles = [Article.inflate(row[0]) for row in results]
             return articles
         except Exception as e:
