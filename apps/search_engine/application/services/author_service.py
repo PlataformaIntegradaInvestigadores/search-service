@@ -72,17 +72,17 @@ class AuthorService(AuthorRepository):
         try:
             query = Q(scopus_id__in=authors_ids)
             nodes = Author.nodes.filter(query)
-            auth_list_str = ", ".join([f'"{w}"' for w in authors_ids])
             # Consulta para obtener enlaces
-
-            query_links = f"""
-                  WITH [{auth_list_str}] as authList
+            query_links = """
+                  WITH $auth_list as authList
                   MATCH (au1:Author)-[r:CO_AUTHORED]-(au2:Author)
                   WHERE au1.scopus_id IN authList AND au2.scopus_id IN authList AND au1 > au2
-                  RETURN collect({{source: au1.scopus_id, target: au2.scopus_id, 
-                      collabStrength: toFloat(r.collab_strength)}}) as links
+                  RETURN collect({source: au1.scopus_id, target: au2.scopus_id,
+                      collabStrength: toFloat(r.collab_strength)}) as links
                   """
-            result = db.cypher_query(query_links)
+            result = db.cypher_query(
+                query_links, {"auth_list": [str(w) for w in authors_ids]}
+            )
             # Ensure we only unpack two values
             result_links, meta = result
             links = result_links[0][0]
@@ -103,27 +103,25 @@ class AuthorService(AuthorRepository):
             print("Filter type: ", filter_type)
             print("Affiliations IDs: ", affiliations_ids)
             print("Authors IDs: ", authors_ids)
-            authors_str = [f'"{w}"' for w in authors_ids]
-            affiliations_str = [f'"{w}"' for w in affiliations_ids]
-
-            authors_ids_str = ", ".join(map(str, authors_str))
-            affiliations_ids_str = ", ".join(map(str, affiliations_str))
-
             if filter_type == "include":
-                query = f"""
+                query = """
                    MATCH (a:Author)-[:AFFILIATED_WITH]->(aff:Affiliation)
-                   WHERE a.scopus_id IN [{authors_ids_str}] AND aff.scopus_id IN [{affiliations_ids_str}]
+                   WHERE a.scopus_id IN $authors_ids AND aff.scopus_id IN $affiliations_ids
                    RETURN a
                    """
-                print("Into of include")
             else:
-                query = f"""
+                query = """
                    MATCH (a:Author)-[:AFFILIATED_WITH]->(aff:Affiliation)
-                   WHERE a.scopus_id IN [{authors_ids_str}] AND NOT aff.scopus_id IN [{affiliations_ids_str}]
+                   WHERE a.scopus_id IN $authors_ids AND NOT aff.scopus_id IN $affiliations_ids
                    RETURN a
                    """
-            print("Current query", query)
-            results, _ = db.cypher_query(query)
+            results, _ = db.cypher_query(
+                query,
+                {
+                    "authors_ids": [str(w) for w in authors_ids],
+                    "affiliations_ids": [str(w) for w in affiliations_ids],
+                },
+            )
             authors = [Author.inflate(row[0]) for row in results]
 
             print("Len of authors extracted: ", len(authors))
@@ -159,44 +157,49 @@ class AuthorService(AuthorRepository):
         custom_name = self._build_diacritic_regex(name)
         skip = (page - 1) * page_size
 
-        query_count = f"""
+        query_count = """
                 MATCH (au:Author) 
-                WHERE  au.first_name =~ '{custom_name}' or 
-                au.last_name =~ '{custom_name}' or 
-                (au.first_name + " " + au.last_name) =~ '{custom_name}' or
-                (au.last_name + " " + au.first_name) =~ '{custom_name}' or  
-                au.auth_name =~ '{custom_name}' or 
-                au.initials =~ '{custom_name}' or 
-                au.email =~ '{custom_name}' or 
-                au.scopus_id =~ '{custom_name}'
+                WHERE  au.first_name =~ $pattern or 
+                au.last_name =~ $pattern or 
+                (au.first_name + " " + au.last_name) =~ $pattern or
+                (au.last_name + " " + au.first_name) =~ $pattern or  
+                au.auth_name =~ $pattern or 
+                au.initials =~ $pattern or 
+                au.email =~ $pattern or 
+                au.scopus_id =~ $pattern
                 RETURN count(au) as total
         """
-        results_count, meta = db.cypher_query(query_count)
+        results_count, meta = db.cypher_query(query_count, {"pattern": custom_name})
         total = results_count[0][0]
 
-        query_fetch = f"""
+        query_fetch = """
                 MATCH (au:Author) 
-                WHERE  au.first_name =~ '{custom_name}' or 
-                au.last_name =~ '{custom_name}' or 
-                (au.first_name + " " + au.last_name) =~ '{custom_name}' or
-                (au.last_name + " " + au.first_name) =~ '{custom_name}' or  
-                au.auth_name =~ '{custom_name}' or 
-                au.initials =~ '{custom_name}' or 
-                au.email =~ '{custom_name}' or 
-                au.scopus_id =~ '{custom_name}'
+                WHERE  au.first_name =~ $pattern or 
+                au.last_name =~ $pattern or 
+                (au.first_name + " " + au.last_name) =~ $pattern or
+                (au.last_name + " " + au.first_name) =~ $pattern or  
+                au.auth_name =~ $pattern or 
+                au.initials =~ $pattern or 
+                au.email =~ $pattern or 
+                au.scopus_id =~ $pattern
                 RETURN au
                 ORDER BY au.citation_count DESC
-                SKIP {skip} LIMIT {page_size}
+                SKIP $skip LIMIT $limit
                 """
-        results_fetch, meta = db.cypher_query(query_fetch)
+        results_fetch, meta = db.cypher_query(
+            query_fetch,
+            {"pattern": custom_name, "skip": int(skip), "limit": int(page_size)},
+        )
         authors = [Author.inflate(row[0]) for row in results_fetch]
         return authors, total
 
     def find_all(self, page_size=None, page=None) -> list[Author]:
         try:
             skip = (page - 1) * page_size
-            query = f"MATCH (a:Author) RETURN a SKIP {skip} LIMIT {page_size}"
-            results, meta = db.cypher_query(query)
+            query = "MATCH (a:Author) RETURN a SKIP $skip LIMIT $limit"
+            results, meta = db.cypher_query(
+                query, {"skip": int(skip), "limit": int(page_size)}
+            )
             authors = [Author.inflate(row[0]) for row in results]
             return authors
         except Exception as e:
