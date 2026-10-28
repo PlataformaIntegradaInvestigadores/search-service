@@ -1,3 +1,5 @@
+import base64
+import os
 from unittest.mock import patch
 
 from rest_framework import status
@@ -77,13 +79,50 @@ class ArticleViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["authors"], ["author-list"])
 
-    def test_destroy_clears_database(self):
-        with patch(
-            "apps.search_engine.infrastructure.api.v1.views.article_views.clear_neo4j_database"
+    CLEAR = "apps.search_engine.infrastructure.api.v1.views.article_views.clear_neo4j_database"
+
+    @staticmethod
+    def _basic(user, password):
+        token = base64.b64encode(f"{user}:{password}".encode()).decode()
+        return {"HTTP_AUTHORIZATION": f"Basic {token}"}
+
+    def _delete(self, **headers):
+        request = factory.delete("/articles/1/", **headers)
+        return ArticleViewSet.as_view({"delete": "destroy"})(request, pk="1")
+
+    def test_destroy_without_credentials_is_rejected_and_does_not_clear(self):
+        with patch.dict(
+            os.environ, {"ADMIN_CENTINELA": "admin", "PASSWORD_CENTINELA": "secret"}
         ):
-            request = factory.delete("/articles/")
-            response = ArticleViewSet.as_view({"delete": "destroy"})(request)
+            with patch(self.CLEAR) as clear:
+                response = self._delete()
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        clear.assert_not_called()
+
+    def test_destroy_with_wrong_credentials_is_rejected(self):
+        with patch.dict(
+            os.environ, {"ADMIN_CENTINELA": "admin", "PASSWORD_CENTINELA": "secret"}
+        ):
+            with patch(self.CLEAR) as clear:
+                response = self._delete(**self._basic("admin", "wrong"))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        clear.assert_not_called()
+
+    def test_destroy_is_rejected_when_admin_credentials_are_not_configured(self):
+        with patch.dict(os.environ, {}, clear=True):
+            with patch(self.CLEAR) as clear:
+                response = self._delete(**self._basic("", ""))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        clear.assert_not_called()
+
+    def test_destroy_clears_database_for_admin(self):
+        with patch.dict(
+            os.environ, {"ADMIN_CENTINELA": "admin", "PASSWORD_CENTINELA": "secret"}
+        ):
+            with patch(self.CLEAR) as clear:
+                response = self._delete(**self._basic("admin", "secret"))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        clear.assert_called_once()
 
     def test_find_articles_by_author_id(self):
         self.mock_service.find_articles_by_author.return_value = []
