@@ -7,6 +7,7 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from common.admin_permission import IsCentinelaAdmin
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,12 @@ class EtlRunView(APIView):
     POST  → dispara upsert_mongo en un hilo daemon y retorna 202 inmediatamente.
     GET   → reporta si el ETL sigue corriendo o ya terminó.
     """
+
+    # Solo administracion: IsCentinelaAdmin acepta el token de LoginView o HTTP Basic;
+    # sin authentication_classes la BasicAuthentication por defecto de DRF
+    # intercepta la cabecera Authorization antes de que corra el permiso.
+    authentication_classes = []
+    permission_classes = [IsCentinelaAdmin]
 
     @extend_schema(
         summary="Iniciar ETL Neo4j → MongoDB",

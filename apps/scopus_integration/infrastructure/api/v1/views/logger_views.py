@@ -8,9 +8,16 @@ from rest_framework.response import Response
 from apps.scopus_integration.infrastructure.api.v1.serializers.logger_request_serializer import (
     LoggerRequestSerializer,
 )
+from common.admin_permission import IsCentinelaAdmin
 
 
 class LoggerViewSet(viewsets.ViewSet):
+    # Solo administracion: IsCentinelaAdmin acepta el token de LoginView o HTTP Basic;
+    # sin authentication_classes la BasicAuthentication por defecto de DRF
+    # intercepta la cabecera Authorization antes de que corra el permiso.
+    authentication_classes = []
+    permission_classes = [IsCentinelaAdmin]
+
     serializer_class = LoggerRequestSerializer
 
     @extend_schema(

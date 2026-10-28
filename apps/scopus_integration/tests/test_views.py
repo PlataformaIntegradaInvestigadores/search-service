@@ -7,11 +7,15 @@ corpus TF-IDF de produccion en su `finally`) o ModelGenerationService
 (lee/escribe el pickle de produccion) se mockean por completo: nunca deben
 tocar resources/models o resources/corpus reales."""
 
+import os
 import threading
 from unittest.mock import MagicMock, patch
 
 from rest_framework import status
-from rest_framework.test import APIRequestFactory, APITestCase
+from rest_framework.test import APIRequestFactory as BaseAPIRequestFactory
+from rest_framework.test import APITestCase
+
+from common.admin_permission import issue_admin_token
 
 from apps.scopus_integration.infrastructure.api.v1.views.corpus_modeling_views import (
     GenerateCorpusView,
@@ -35,6 +39,29 @@ from apps.scopus_integration.infrastructure.api.v1.views.update_information_view
 )
 
 VIEWS = "apps.scopus_integration.infrastructure.api.v1.views"
+
+_ADMIN_ENV = patch.dict(
+    os.environ, {"ADMIN_CENTINELA": "admin", "PASSWORD_CENTINELA": "secret"}
+)
+
+
+def setUpModule():
+    _ADMIN_ENV.start()
+
+
+def tearDownModule():
+    _ADMIN_ENV.stop()
+
+
+class APIRequestFactory(BaseAPIRequestFactory):
+    """Peticiones como las del panel de administracion: llevan X-Admin-Token.
+
+    Estas vistas exigen IsCentinelaAdmin; sin la cabecera responderian 403 y las
+    pruebas no llegarian a la logica que verifican."""
+
+    def generic(self, method, path, *args, **extra):
+        extra.setdefault("HTTP_X_ADMIN_TOKEN", issue_admin_token())
+        return super().generic(method, path, *args, **extra)
 
 
 class GenerateCorpusViewTests(APITestCase):

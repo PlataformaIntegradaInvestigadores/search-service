@@ -15,9 +15,16 @@ from apps.scopus_integration.application.usecases.update_author_information_usec
     UpdateAuthorInformationUseCase,
 )
 from apps.search_engine.application.services.author_service import AuthorService
+from common.admin_permission import IsCentinelaAdmin
 
 
 class UpdateInformationViewSet(viewsets.ViewSet):
+    # Solo administracion: IsCentinelaAdmin acepta el token de LoginView o HTTP Basic;
+    # sin authentication_classes la BasicAuthentication por defecto de DRF
+    # intercepta la cabecera Authorization antes de que corra el permiso.
+    authentication_classes = []
+    permission_classes = [IsCentinelaAdmin]
+
     client = ScopusClient()
     author_repository = AuthorService()
     lock = threading.Lock()

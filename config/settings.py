@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 
 import mongoengine
+from corsheaders.defaults import default_headers
 from dotenv import load_dotenv
 from neomodel import config
 
@@ -46,6 +47,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",
 ]
 CORS_ORIGIN_ALLOW_ALL = True
+# El panel de administracion manda el token de LoginView en X-Admin-Token.
+CORS_ALLOW_HEADERS = (*default_headers, "x-admin-token")
 
 # Connect to Neo4j database
 neo4j_username = os.environ.get("NEO4J_USERNAME")

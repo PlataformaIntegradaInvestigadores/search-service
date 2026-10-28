@@ -16,11 +16,18 @@ from apps.scopus_integration.application.services.corpus_generation_service impo
 from apps.scopus_integration.application.usecases.generate_corpus_usecase import (
     GenerateCorpusUseCase,
 )
+from common.admin_permission import IsCentinelaAdmin
 
 nltk.download("stopwords")
 
 
 class GenerateCorpusView(APIView):
+    # Solo administracion: IsCentinelaAdmin acepta el token de LoginView o HTTP Basic;
+    # sin authentication_classes la BasicAuthentication por defecto de DRF
+    # intercepta la cabecera Authorization antes de que corra el permiso.
+    authentication_classes = []
+    permission_classes = [IsCentinelaAdmin]
+
     @extend_schema(
         summary="Generate corpus",
         tags=["TF-IDF"],
