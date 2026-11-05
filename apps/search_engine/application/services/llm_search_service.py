@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 
@@ -323,6 +324,9 @@ class DenseRetriever:
 class LLMSearchService:
     _instance = None
     _initialized = False
+    # The models can now be loaded by a background thread at worker start while a
+    # request arrives; without the lock both would load them (~1 GB each).
+    _init_lock = threading.Lock()
 
     def __new__(cls):
         if cls._instance is None:
@@ -330,7 +334,11 @@ class LLMSearchService:
         return cls._instance
 
     def __init__(self):
-        if not self._initialized:
+        if self._initialized:
+            return
+        with self._init_lock:
+            if self._initialized:
+                return
             BASE_DIR = "resources/"
             self.scibert_model_path = os.path.join(
                 BASE_DIR, "models", "scibert_scivocab_uncased"

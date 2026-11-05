@@ -36,7 +36,7 @@ services:
           - search-service
 
   search-neo4j:
-    image: neo4j:latest
+    image: neo4j:5.18
     restart: unless-stopped
     ports:
       - "127.0.0.1:7474:7474"
