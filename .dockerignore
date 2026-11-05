@@ -32,8 +32,9 @@ neo4j_db/
 mongo_db/
 hf_cache/
 
-# Modelos ML y embeddings pesados: se montan como volumen en runtime
-# (ver docker-compose_produccion.yaml), no van dentro de la imagen.
+# Modelos ML y embeddings pesados: no van dentro de la imagen. En runtime se
+# montan con el bind mount `.:/app` del compose (local y plataforma), así que la
+# imagen sola no puede responder búsquedas.
 resources/
 
 # Entorno virtual
