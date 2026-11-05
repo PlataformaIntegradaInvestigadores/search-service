@@ -97,7 +97,9 @@ jobs:
         run: |
           sleep 30
           HEALTHY=false
-          for i in 1 2 3 4 5; do
+          # Gunicorn only opens the port after importing torch, spaCy and KeyBERT
+          # (~1 min on this server), so wait up to ~5 minutes instead of ~1.
+          for i in $(seq 1 40); do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 http://localhost:8001/health/ || echo "000")
             echo "Intento $i: HTTP $STATUS"
             if [ "$STATUS" = "200" ]; then
