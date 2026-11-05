@@ -13,6 +13,7 @@ A failure to load must not affect the worker: health and every route that does
 not need the models keep working, and the first search retries.
 """
 
+import importlib
 import logging
 import os
 import threading
@@ -48,6 +49,26 @@ def preload_models() -> bool:
 
     logger.info("Modelos de búsqueda precargados")
     return True
+
+
+def import_heavy_modules() -> None:
+    """Import the URLconf (and spaCy) up front, before Gunicorn forks.
+
+    Without this the first request of each worker imports ``config.urls`` (which
+    pulls in nltk -> tkinter, torch, KeyBERT...) in the main thread while the
+    background preload imports the same libraries in another thread. Both end up
+    in ``dlopen`` / ``dl_iterate_phdr`` waiting for each other and the worker never
+    finishes loading (Gunicorn kills it after the 300 s timeout). Importing here,
+    in the master, means workers share the modules and no thread imports
+    concurrently.
+    """
+    from django.conf import settings
+
+    try:
+        importlib.import_module(settings.ROOT_URLCONF)
+        importlib.import_module("spacy")
+    except Exception:
+        logger.exception("No se pudieron importar los módulos pesados al arrancar")
 
 
 def preload_models_in_background() -> threading.Thread | None:
