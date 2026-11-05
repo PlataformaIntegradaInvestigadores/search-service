@@ -14,3 +14,8 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
 application = get_wsgi_application()
+
+# Imported once in the Gunicorn master (--preload), before the workers fork.
+from apps.search_engine.application.preload import import_heavy_modules  # noqa: E402
+
+import_heavy_modules()

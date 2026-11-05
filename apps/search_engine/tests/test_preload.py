@@ -112,3 +112,20 @@ def test_concurrent_first_use_loads_the_models_once():
         LLMSearchService._initialized = False
 
     assert len(calls) == 1
+
+
+def test_import_heavy_modules_imports_the_urlconf_and_spacy():
+    with patch.object(preload.importlib, "import_module") as import_module:
+        preload.import_heavy_modules()
+
+    imported = [call.args[0] for call in import_module.call_args_list]
+    assert imported[0] == "config.urls"
+    assert "spacy" in imported
+
+
+def test_import_heavy_modules_failure_is_logged_and_does_not_raise(caplog):
+    with patch.object(preload.importlib, "import_module", side_effect=ImportError("x")):
+        with caplog.at_level("ERROR"):
+            preload.import_heavy_modules()
+
+    assert "No se pudieron importar los módulos pesados" in caplog.text
