@@ -37,6 +37,10 @@ hf_cache/
 # imagen sola no puede responder búsquedas.
 resources/
 
+# Datos de arranque de las bases (2+ GB). Solo los usa scripts/bootstrap.sh desde el
+# host; metidos en la imagen, cada deploy escribía una capa nueva de ese tamaño.
+seed_data/
+
 # Entorno virtual
 venv/
 env/
