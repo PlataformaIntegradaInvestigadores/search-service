@@ -18,6 +18,7 @@ from corsheaders.defaults import default_headers
 from dotenv import load_dotenv
 from neomodel import config
 
+from config.mongo import server_selection_timeout_ms
 from config.openapi_docs import INFO_DESCRIPTION, TAGS
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -76,7 +77,9 @@ mongo_auth_source = os.environ.get("MONGO_AUTH_SOURCE", "admin")
 
 mongo_uri = f"mongodb://{mongo_db_username}:{mongo_db_password}@{mongo_host}:{mongo_port}/{mongo_db_name}?authSource={mongo_auth_source}"
 # print(mongo_uri)
-mongoengine.connect(host=mongo_uri)
+mongoengine.connect(
+    host=mongo_uri, serverSelectionTimeoutMS=server_selection_timeout_ms()
+)
 # mongoengine.connect(
 #     db='dtl'
 # )
