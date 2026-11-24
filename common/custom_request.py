@@ -16,7 +16,7 @@ class CustomRequest:
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
-            raise Exception(f"Error on do get: {e}")
+            raise Exception(f"Error on do get: {e}") from e
 
     def do_post(self, endpoint: str, data: dict) -> Any:
         try:
@@ -25,4 +25,4 @@ class CustomRequest:
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
-            raise Exception(f"Error on do post: {e}")
+            raise Exception(f"Error on do post: {e}") from e

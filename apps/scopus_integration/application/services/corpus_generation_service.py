@@ -8,9 +8,11 @@ from apps.scopus_integration.domain.repositories.corpus_repository import (
 class CorpusService(CorpusRepository):
     def get_corpus_by_author(self):
         try:
-            query = """match (au:Author)-[:WROTE]->(ar:Article) optional match (ar)-[r:USES]-(
-            to:Topic) return au.scopus_id, collect(distinct([ar.title, ar.abstract])) as articles, collect(to.name) 
-            as topics"""
+            query = """match (au:Author)-[:WROTE]->(ar:Article)
+            optional match (ar)-[r:USES]-(to:Topic)
+            return au.scopus_id,
+                collect(distinct([ar.title, ar.abstract])) as articles,
+                collect(to.name) as topics"""
 
             results, meta = db.cypher_query(query)
 
@@ -30,14 +32,15 @@ class CorpusService(CorpusRepository):
 
             return authors_with_articles_and_topics
         except Exception as e:
-            raise Exception("Error while getting corpus by author ", str(e))
+            raise Exception("Error while getting corpus by author ", str(e)) from e
 
     def get_corpus_by_article(self):
         try:
             query = """
                MATCH (ar:Article)
                OPTIONAL MATCH (ar)-[:USES]-(to:Topic)
-               RETURN ar.scopus_id as scopus_id, ar.title as title, ar.abstract as abstract, collect(to.name) as topics
+               RETURN ar.scopus_id as scopus_id, ar.title as title,
+                      ar.abstract as abstract, collect(to.name) as topics
                """
             results, meta = db.cypher_query(query)
 
@@ -54,7 +57,7 @@ class CorpusService(CorpusRepository):
 
             return articles_with_topics
         except Exception as e:
-            raise Exception("Error while getting corpus by article ", str(e))
+            raise Exception("Error while getting corpus by article ", str(e)) from e
 
     def get_combined_corpus(self):
         try:
@@ -97,4 +100,4 @@ class CorpusService(CorpusRepository):
 
             return combined_data
         except Exception as e:
-            raise Exception("Error while generating corpus ", str(e))
+            raise Exception("Error while generating corpus ", str(e)) from e

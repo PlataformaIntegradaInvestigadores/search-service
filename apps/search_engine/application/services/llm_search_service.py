@@ -30,7 +30,9 @@ def _ollama_client() -> ollama.Client:
 
 
 def _hyde_model_name() -> str:
-    return os.environ.get("OLLAMA_HYDE_MODEL", os.environ.get("OLLAMA_QA_MODEL", DEFAULT_HYDE_MODEL))
+    return os.environ.get(
+        "OLLAMA_HYDE_MODEL", os.environ.get("OLLAMA_QA_MODEL", DEFAULT_HYDE_MODEL)
+    )
 
 
 class QueryProcessor:
@@ -208,7 +210,10 @@ class HydeBM25Retriever:
         if self.bm25 is not None:
             return
         corpus_texts = [
-            f"{row.get('title', '')} {row.get('abstract', row.get('content', ''))}".lower()
+            (
+                f"{row.get('title', '')} "
+                f"{row.get('abstract', row.get('content', ''))}"
+            ).lower()
             for _, row in self.df.iterrows()
         ]
         tokenized_corpus = [doc.split() for doc in corpus_texts]
@@ -216,9 +221,11 @@ class HydeBM25Retriever:
 
     def _generate_hypothetical_document(self, raw_query: str) -> str:
         prompt = (
-            f"Act as a scientific researcher. Write a 3-sentence abstract of a fictional "
+            "Act as a scientific researcher. Write a 3-sentence abstract of a "
+            "fictional "
             f"academic paper that answers the following query: '{raw_query}'. "
-            f"Use rigorous academic tone, go straight to the text with no introductions, "
+            "Use rigorous academic tone, go straight to the text with no "
+            "introductions, "
             f"and ALWAYS write in English."
         )
         try:

@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.authentication.infrastructure.api.v1.serializers.login_request_serializer import (
+from apps.authentication.infrastructure.api.v1.serializers.login_request_serializer import (  # noqa: E501
     LoginRequestSerializer,
 )
 from common.admin_permission import admin_token_max_age, issue_admin_token

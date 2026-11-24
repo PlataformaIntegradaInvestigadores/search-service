@@ -11,7 +11,7 @@ from apps.scopus_integration.application.services.model_corpus_observer_service 
     ModelCorpusObserverService,
 )
 from apps.scopus_integration.application.services.scopus_client import ScopusClient
-from apps.scopus_integration.application.usecases.update_author_information_usecase import (
+from apps.scopus_integration.application.usecases.update_author_information_usecase import (  # noqa: E501
     UpdateAuthorInformationUseCase,
 )
 from apps.search_engine.application.services.author_service import AuthorService

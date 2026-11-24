@@ -92,8 +92,10 @@ class DashboardInformationViewSet(viewsets.ViewSet):
         summary="Estado de salud de la sincronización Neo4j → MongoDB",
         description=(
             "Compara los totales de la fuente de verdad (Neo4j) contra los agregados "
-            "ya materializados en MongoDB por el ETL incremental, para detectar autores "
-            "sin métricas, artículos pendientes de sincronizar y colecciones desactualizadas."
+            "ya materializados en MongoDB por el ETL incremental, para detectar "
+            "autores "
+            "sin métricas, artículos pendientes de sincronizar y colecciones "
+            "desactualizadas."
         ),
         tags=["Dashboard Information"],
     )

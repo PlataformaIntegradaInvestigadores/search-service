@@ -6,7 +6,9 @@ from apps.dashboards.domain.entities.affiliation_topics import AffiliationTopics
 from apps.dashboards.domain.entities.affiliation_topics_acumulated import (
     AffiliationTopicsAcumulated,
 )
-from apps.dashboards.domain.entities.affiliation_topics_year import AffiliationTopicsYear
+from apps.dashboards.domain.entities.affiliation_topics_year import (
+    AffiliationTopicsYear,
+)
 from apps.dashboards.domain.entities.affiliation_year import AffiliationYear
 from apps.dashboards.domain.entities.affiliation_year_acumulated import (
     AffiliationAcumulated,
@@ -70,7 +72,9 @@ class AffiliationViewSetTests(APITestCase):
         self.assertEqual(response.data[0]["text"], "Uni A")
 
     def test_search(self):
-        Affiliation.objects.create(scopus_id=1, name="Universidad Central", total_articles=5)
+        Affiliation.objects.create(
+            scopus_id=1, name="Universidad Central", total_articles=5
+        )
         Affiliation.objects.create(scopus_id=2, name="Other", total_articles=1)
         response = self.client.get(f"{BASE}search/", {"query": "Central"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)

@@ -25,11 +25,13 @@ class CoAuthoredService(CoAuthoredRepository):
             # Recogemos los IDs del autor principal y todos sus coautores
             all_scopus_ids = [str(author.scopus_id)] + [str(c.scopus_id) for c in nodes]
 
-            # Consulta Cypher para obtener TODAS las aristas de coautoría entre cualquier par de nodos en la red (Densidad de red)
+            # Consulta Cypher para obtener TODAS las aristas de coautoría entre
+            # cualquier par de nodos en la red (densidad de red).
             query_links = """
                 WITH $auth_list as authList
                 MATCH (au1:Author)-[r:CO_AUTHORED]-(au2:Author)
-                WHERE au1.scopus_id IN authList AND au2.scopus_id IN authList AND au1.scopus_id > au2.scopus_id
+                WHERE au1.scopus_id IN authList AND au2.scopus_id IN authList
+                  AND au1.scopus_id > au2.scopus_id
                 RETURN collect({
                     source: au1.scopus_id, 
                     target: au2.scopus_id, 
@@ -54,4 +56,4 @@ class CoAuthoredService(CoAuthoredRepository):
         except Exception as e:
             raise Exception(
                 "An error occurred while trying to find coauthors by id.", str(e)
-            )
+            ) from e

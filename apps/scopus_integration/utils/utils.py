@@ -39,7 +39,8 @@ def recastDfAffiliations(dfAffiliations):
         inplace=True,
     )
 
-    # Modifica el valor de la columna identifier. Ej. AFFILIATION_ID:60072059 -> 60072059
+    # Modifica el valor de la columna identifier. Ej. AFFILIATION_ID:60072059 ->
+    # 60072059
     dfAffiliations["identifier"] = dfAffiliations["identifier"].apply(
         lambda x: x.split(":")[1]
     )
@@ -120,7 +121,8 @@ def recast_df_articles(df_articles):
     # Agrega la columna author_count que contiene el número de autores de un artículo.
     df_articles["author_count"] = df_articles["authors"].apply(lambda x: len(x))
 
-    # Agrega la columna affiliation_count que contiene el número de afiliaciones de un artículo.
+    # Agrega la columna affiliation_count que contiene el número de afiliaciones de un
+    # artículo.
     df_articles["affiliation_count"] = df_articles["affiliations"].apply(
         lambda x: len(x)
     )
@@ -280,7 +282,7 @@ def article_retrieval_to_scopus_search(articleRetrieval):
         scopusSearch['dc:description'] = articleRetrieval['coredata']['dc:description']
     else:
         scopusSearch['dc:description'] = np.nan
-    """
+    """  # noqa: E501
     # affiliation
     if "affiliation" in articleRetrieval:
         if type(articleRetrieval["affiliation"]) is list:

@@ -119,7 +119,8 @@ class Article(DjangoNode):
                         )
                         coauth_relationship.save()
                         print(
-                            f"Created relationship strength: {coauth_relationship.collab_strength}"
+                            "Created relationship strength: "
+                            f"{coauth_relationship.collab_strength}"
                         )
 
         return article

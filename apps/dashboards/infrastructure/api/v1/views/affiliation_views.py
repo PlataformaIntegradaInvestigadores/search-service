@@ -30,22 +30,22 @@ from apps.dashboards.domain.entities.affiliation_year_acumulated import (
     AffiliationAcumulated,
 )
 from apps.dashboards.domain.entities.country_topics_year import CountryTopicsYear
-from apps.dashboards.infrastructure.api.v1.serializers.affiliation_acumulated_serializer import (
+from apps.dashboards.infrastructure.api.v1.serializers.affiliation_acumulated_serializer import (  # noqa: E501
     AffiliationAcumulatedSerializer,
 )
 from apps.dashboards.infrastructure.api.v1.serializers.affiliation_serializer import (
     AffiliationSerializer,
 )
-from apps.dashboards.infrastructure.api.v1.serializers.affiliation_topic_serializer import (
+from apps.dashboards.infrastructure.api.v1.serializers.affiliation_topic_serializer import (  # noqa: E501
     AffiliationTopicYearSerializer,
 )
-from apps.dashboards.infrastructure.api.v1.serializers.affiliation_topics_acumulated_serializer import (
+from apps.dashboards.infrastructure.api.v1.serializers.affiliation_topics_acumulated_serializer import (  # noqa: E501
     AffiliationTopicAcumulatedSerializer,
 )
-from apps.dashboards.infrastructure.api.v1.serializers.affiliation_topics_serializer import (
+from apps.dashboards.infrastructure.api.v1.serializers.affiliation_topics_serializer import (  # noqa: E501
     AffiliationTopicsSerializer,
 )
-from apps.dashboards.infrastructure.api.v1.serializers.affiliation_year_serializer import (
+from apps.dashboards.infrastructure.api.v1.serializers.affiliation_year_serializer import (  # noqa: E501
     AffiliationYearSerializer,
 )
 
@@ -389,7 +389,10 @@ class AffiliationViewSet(viewsets.ModelViewSet):
             )
 
     @extend_schema(
-        description="Get number of articles and topics accumulated for an affiliation by year",
+        description=(
+            "Get number of articles and topics accumulated for an affiliation by "
+            "year"
+        ),
         responses=OpenApiExample(
             "Articles and topics accumulated by year", {"articles": 100, "topics": 20}
         ),
@@ -583,7 +586,10 @@ class AffiliationViewSet(viewsets.ModelViewSet):
             )
 
     @extend_schema(
-        description="Get topics x affiliations production matrix for a year (heatmap de concentración)",
+        description=(
+            "Get topics x affiliations production matrix for a year (heatmap de "
+            "concentración)"
+        ),
         tags=["Affiliations"],
         parameters=[
             OpenApiParameter(

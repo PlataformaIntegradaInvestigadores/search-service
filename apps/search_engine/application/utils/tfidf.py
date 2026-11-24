@@ -59,12 +59,12 @@ class Model:
                 return pickle.load(fp)
 
         except Exception as e:
-            raise Exception(f"Error while loading model: {str(e)}")
+            raise Exception(f"Error while loading model: {str(e)}") from e
 
     def detect_language(self, text):
         try:
             return detect(text)
-        except:
+        except Exception:
             return "es"
 
     def clean_text(self, text):

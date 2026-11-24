@@ -66,7 +66,7 @@ try:
         f"{neo4j_scheme}://{neo4j_username}:{neo4j_password}@{neo4j_host}:{neo4j_port}"
     )
 except Exception as e:
-    raise ValueError(f"Error connecting to Neo4j database: {e}")
+    raise ValueError(f"Error connecting to Neo4j database: {e}") from e
 
 mongo_db_name = os.environ.get("MONGO_DB_NAME")
 mongo_db_username = os.environ.get("MONGO_DB_USERNAME")
@@ -251,7 +251,7 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",  # noqa: E501
     },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",

@@ -5,8 +5,9 @@ from apps.dashboards.domain.entities.affiliation_topics import AffiliationTopics
 from apps.dashboards.domain.entities.affiliation_topics_acumulated import (
     AffiliationTopicsAcumulated,
 )
-from apps.dashboards.domain.entities.affiliation_topics_year import AffiliationTopicsYear
-from apps.dashboards.domain.entities.country_acumulated import CountryAcumulated
+from apps.dashboards.domain.entities.affiliation_topics_year import (
+    AffiliationTopicsYear,
+)
 from apps.dashboards.domain.entities.country_topics import CountryTopics
 from apps.dashboards.domain.entities.country_topics_acumulated import (
     CountryTopicsAcumulated,
@@ -150,7 +151,9 @@ class CountryViewsTests(APITestCase):
         self.assertEqual(len(response.data), 1)
 
     def test_search(self):
-        CountryTopics.objects.create(topic_name="Artificial Intelligence", total_articles=5)
+        CountryTopics.objects.create(
+            topic_name="Artificial Intelligence", total_articles=5
+        )
         response = self.client.get(f"{BASE}search/", {"query": "Artificial"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)

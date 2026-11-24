@@ -8,83 +8,93 @@ from apps.search_engine.application.utils.tfidf import Model
 def _make_model(model_type="article", fake_model=None):
     Model._nlp = None
     Model._kw_model = None
-    with patch(
-        "apps.search_engine.application.utils.tfidf.open",
-        mock_open(read_data=b""),
-    ), patch(
-        "apps.search_engine.application.utils.tfidf.pickle.load",
-        return_value=fake_model or {},
-    ), patch(
-        "apps.search_engine.application.utils.tfidf.spacy.load"
-    ), patch(
-        "apps.search_engine.application.utils.tfidf.KeyBERT"
-    ), patch(
-        "apps.search_engine.application.utils.tfidf.GoogleTranslator"
+    with (
+        patch(
+            "apps.search_engine.application.utils.tfidf.open",
+            mock_open(read_data=b""),
+        ),
+        patch(
+            "apps.search_engine.application.utils.tfidf.pickle.load",
+            return_value=fake_model or {},
+        ),
+        patch("apps.search_engine.application.utils.tfidf.spacy.load"),
+        patch("apps.search_engine.application.utils.tfidf.KeyBERT"),
+        patch("apps.search_engine.application.utils.tfidf.GoogleTranslator"),
     ):
         return Model(model_type)
 
 
 class ModelLoadTests(SimpleTestCase):
     def test_load_model_rejects_non_string_type(self):
-        with self.assertRaises(Exception):
+        with self.assertRaisesRegex(Exception, "Type must be a string"):
             _make_model(model_type=123)
 
     def test_load_model_uses_tfidf_path_for_article(self):
-        with patch(
-            "apps.search_engine.application.utils.tfidf.open",
-            mock_open(read_data=b""),
-        ) as mocked_open, patch(
-            "apps.search_engine.application.utils.tfidf.pickle.load", return_value={}
-        ), patch("apps.search_engine.application.utils.tfidf.spacy.load"), patch(
-            "apps.search_engine.application.utils.tfidf.KeyBERT"
-        ), patch(
-            "apps.search_engine.application.utils.tfidf.GoogleTranslator"
+        with (
+            patch(
+                "apps.search_engine.application.utils.tfidf.open",
+                mock_open(read_data=b""),
+            ) as mocked_open,
+            patch(
+                "apps.search_engine.application.utils.tfidf.pickle.load",
+                return_value={},
+            ),
+            patch("apps.search_engine.application.utils.tfidf.spacy.load"),
+            patch("apps.search_engine.application.utils.tfidf.KeyBERT"),
+            patch("apps.search_engine.application.utils.tfidf.GoogleTranslator"),
         ):
             Model("article")
         opened_path = mocked_open.call_args[0][0]
         self.assertIn("tf-idf/model-v10.0.pkl", opened_path)
 
     def test_load_model_uses_alternate_path_for_other_types(self):
-        with patch(
-            "apps.search_engine.application.utils.tfidf.open",
-            mock_open(read_data=b""),
-        ) as mocked_open, patch(
-            "apps.search_engine.application.utils.tfidf.pickle.load", return_value={}
-        ), patch("apps.search_engine.application.utils.tfidf.spacy.load"), patch(
-            "apps.search_engine.application.utils.tfidf.KeyBERT"
-        ), patch(
-            "apps.search_engine.application.utils.tfidf.GoogleTranslator"
+        with (
+            patch(
+                "apps.search_engine.application.utils.tfidf.open",
+                mock_open(read_data=b""),
+            ) as mocked_open,
+            patch(
+                "apps.search_engine.application.utils.tfidf.pickle.load",
+                return_value={},
+            ),
+            patch("apps.search_engine.application.utils.tfidf.spacy.load"),
+            patch("apps.search_engine.application.utils.tfidf.KeyBERT"),
+            patch("apps.search_engine.application.utils.tfidf.GoogleTranslator"),
         ):
             Model("topic")
         opened_path = mocked_open.call_args[0][0]
         self.assertIn("model-v11.0.pkl", opened_path)
 
     def test_load_model_wraps_errors(self):
-        with patch(
-            "apps.search_engine.application.utils.tfidf.open",
-            side_effect=FileNotFoundError("nope"),
-        ), patch("apps.search_engine.application.utils.tfidf.spacy.load"), patch(
-            "apps.search_engine.application.utils.tfidf.KeyBERT"
-        ), patch(
-            "apps.search_engine.application.utils.tfidf.GoogleTranslator"
+        with (
+            patch(
+                "apps.search_engine.application.utils.tfidf.open",
+                side_effect=FileNotFoundError("nope"),
+            ),
+            patch("apps.search_engine.application.utils.tfidf.spacy.load"),
+            patch("apps.search_engine.application.utils.tfidf.KeyBERT"),
+            patch("apps.search_engine.application.utils.tfidf.GoogleTranslator"),
         ):
-            with self.assertRaises(Exception):
+            with self.assertRaisesRegex(Exception, "nope"):
                 Model("article")
 
     def test_nlp_and_kw_model_are_cached_singletons(self):
         Model._nlp = None
         Model._kw_model = None
-        with patch(
-            "apps.search_engine.application.utils.tfidf.open",
-            mock_open(read_data=b""),
-        ), patch(
-            "apps.search_engine.application.utils.tfidf.pickle.load", return_value={}
-        ), patch(
-            "apps.search_engine.application.utils.tfidf.spacy.load"
-        ) as mock_spacy_load, patch(
-            "apps.search_engine.application.utils.tfidf.KeyBERT"
-        ) as mock_keybert, patch(
-            "apps.search_engine.application.utils.tfidf.GoogleTranslator"
+        with (
+            patch(
+                "apps.search_engine.application.utils.tfidf.open",
+                mock_open(read_data=b""),
+            ),
+            patch(
+                "apps.search_engine.application.utils.tfidf.pickle.load",
+                return_value={},
+            ),
+            patch(
+                "apps.search_engine.application.utils.tfidf.spacy.load"
+            ) as mock_spacy_load,
+            patch("apps.search_engine.application.utils.tfidf.KeyBERT") as mock_keybert,
+            patch("apps.search_engine.application.utils.tfidf.GoogleTranslator"),
         ):
             Model("article")
             Model("article")
@@ -123,7 +133,9 @@ class ModelQueryProcessingTests(SimpleTestCase):
         token = MagicMock(is_alpha=True, text="quantum")
         self.model.nlp.return_value = [token]
         self.model.kw_model.extract_keywords.return_value = [("quantum computing", 0.9)]
-        result = self.model.enhance_query_semantically("quantum computing research topic")
+        result = self.model.enhance_query_semantically(
+            "quantum computing research topic"
+        )
         self.assertIn("quantum", result)
 
     def test_process_query_translates_non_english(self):

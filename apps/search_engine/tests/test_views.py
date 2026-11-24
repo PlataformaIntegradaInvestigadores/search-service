@@ -25,15 +25,22 @@ from common.admin_permission import IsCentinelaAdmin
 
 factory = APIRequestFactory()
 
-ARTICLE_SERVICE = "apps.search_engine.infrastructure.api.v1.views.article_views.ArticleService"
-AUTHOR_SERVICE = "apps.search_engine.infrastructure.api.v1.views.author_views.AuthorService"
+ARTICLE_SERVICE = (
+    "apps.search_engine.infrastructure.api.v1.views.article_views.ArticleService"
+)
+AUTHOR_SERVICE = (
+    "apps.search_engine.infrastructure.api.v1.views.author_views.AuthorService"
+)
 AFFILIATION_SERVICE_AUTHOR_VIEW = (
     "apps.search_engine.infrastructure.api.v1.views.author_views.AffiliationService"
 )
 AFFILIATION_SERVICE = (
-    "apps.search_engine.infrastructure.api.v1.views.affiliation_views.AffiliationService"
+    "apps.search_engine.infrastructure.api.v1.views."
+    "affiliation_views.AffiliationService"
 )
-TOPIC_SERVICE = "apps.search_engine.infrastructure.api.v1.views.topic_views.TopicService"
+TOPIC_SERVICE = (
+    "apps.search_engine.infrastructure.api.v1.views.topic_views.TopicService"
+)
 
 
 class ArticleViewSetTests(APITestCase):
@@ -80,7 +87,10 @@ class ArticleViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["authors"], ["author-list"])
 
-    CLEAR = "apps.search_engine.infrastructure.api.v1.views.article_views.clear_neo4j_database"
+    CLEAR = (
+        "apps.search_engine.infrastructure.api.v1.views."
+        "article_views.clear_neo4j_database"
+    )
 
     @staticmethod
     def _basic(user, password):
@@ -137,18 +147,18 @@ class ArticleViewSetTests(APITestCase):
     def test_find_articles_by_author_id(self):
         self.mock_service.find_articles_by_author.return_value = []
         request = factory.get("/articles/find-articles-by-author-id/?author_id=1")
-        response = ArticleViewSet.as_view(
-            {"get": "find_articles_by_author_id"}
-        )(request)
+        response = ArticleViewSet.as_view({"get": "find_articles_by_author_id"})(
+            request
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_most_relevant_articles_by_topic_invalid_payload(self):
         request = factory.post(
             "/articles/most-relevant-articles-by-topic/", {}, format="json"
         )
-        response = ArticleViewSet.as_view(
-            {"post": "most_relevant_articles_by_topic"}
-        )(request)
+        response = ArticleViewSet.as_view({"post": "most_relevant_articles_by_topic"})(
+            request
+        )
         self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def test_most_relevant_articles_by_topic_success(self):
@@ -260,13 +270,17 @@ class AuthorViewsTests(APITestCase):
     def test_most_relevant_authors_without_type_filter(self):
         import pandas as pd
 
-        with patch(
-            "apps.search_engine.infrastructure.api.v1.views.author_views.MostRelevantAuthorsByTopicUseCase"
-        ) as mrbtu, patch(
-            "apps.search_engine.infrastructure.api.v1.views.author_views.AffiliationByAuthorsUsecase"
-        ) as abau, patch(
-            "apps.search_engine.infrastructure.api.v1.views.author_views.AuthorsCommunityUseCase"
-        ) as acuc:
+        with (
+            patch(
+                "apps.search_engine.infrastructure.api.v1.views.author_views.MostRelevantAuthorsByTopicUseCase"
+            ) as mrbtu,
+            patch(
+                "apps.search_engine.infrastructure.api.v1.views.author_views.AffiliationByAuthorsUsecase"
+            ) as abau,
+            patch(
+                "apps.search_engine.infrastructure.api.v1.views.author_views.AuthorsCommunityUseCase"
+            ) as acuc,
+        ):
             mrbtu.return_value.execute.return_value = pd.Series([0.5], index=["1"])
             abau.return_value.execute.return_value = []
             acuc.return_value.execute.return_value = {
@@ -286,15 +300,20 @@ class AuthorViewsTests(APITestCase):
     def test_most_relevant_authors_with_type_filter(self):
         import pandas as pd
 
-        with patch(
-            "apps.search_engine.infrastructure.api.v1.views.author_views.MostRelevantAuthorsByTopicUseCase"
-        ) as mrbtu, patch(
-            "apps.search_engine.infrastructure.api.v1.views.author_views.AffiliationByAuthorsUsecase"
-        ) as abau, patch(
-            "apps.search_engine.infrastructure.api.v1.views.author_views.AuthorsByAffiliationsFiltersUseCase"
-        ) as abfu, patch(
-            "apps.search_engine.infrastructure.api.v1.views.author_views.AuthorsCommunityUseCase"
-        ) as acuc:
+        with (
+            patch(
+                "apps.search_engine.infrastructure.api.v1.views.author_views.MostRelevantAuthorsByTopicUseCase"
+            ) as mrbtu,
+            patch(
+                "apps.search_engine.infrastructure.api.v1.views.author_views.AffiliationByAuthorsUsecase"
+            ) as abau,
+            patch(
+                "apps.search_engine.infrastructure.api.v1.views.author_views.AuthorsByAffiliationsFiltersUseCase"
+            ) as abfu,
+            patch(
+                "apps.search_engine.infrastructure.api.v1.views.author_views.AuthorsCommunityUseCase"
+            ) as acuc,
+        ):
             mrbtu.return_value.execute.return_value = pd.Series([0.5], index=["1"])
             abau.return_value.execute.return_value = []
             filtered_author = type("Obj", (), {"scopus_id": "1"})()
@@ -314,9 +333,7 @@ class AuthorViewsTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_most_relevant_authors_handles_errors(self):
-        request = factory.post(
-            "/authors/most_relevant_authors/", {}, format="json"
-        )
+        request = factory.post("/authors/most_relevant_authors/", {}, format="json")
         response = AuthorViews.as_view({"post": "most_relevant_authors"})(request)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -357,9 +374,10 @@ class AffiliationViewSetTests(APITestCase):
 
 class CoAuthorsViewSetTests(APITestCase):
     def test_coauthors_by_id_success(self):
-        with patch.object(
-            CoAuthorsViewSet, "co_author_service"
-        ) as mock_service, patch.object(CoAuthorsViewSet, "author_service"):
+        with (
+            patch.object(CoAuthorsViewSet, "co_author_service") as mock_service,
+            patch.object(CoAuthorsViewSet, "author_service"),
+        ):
             mock_service.find_coauthors_by_id.return_value = ([], [])
             request = factory.get("/coauthors/1/")
             response = CoAuthorsViewSet.as_view({"get": "coauthors_by_id"})(
@@ -370,12 +388,11 @@ class CoAuthorsViewSetTests(APITestCase):
     def test_coauthors_by_id_does_not_exist(self):
         from apps.search_engine.domain.entities.author import Author
 
-        with patch.object(
-            CoAuthorsViewSet, "co_author_service"
-        ) as mock_service, patch.object(CoAuthorsViewSet, "author_service"):
-            mock_service.find_coauthors_by_id.side_effect = Author.DoesNotExist(
-                Author
-            )
+        with (
+            patch.object(CoAuthorsViewSet, "co_author_service") as mock_service,
+            patch.object(CoAuthorsViewSet, "author_service"),
+        ):
+            mock_service.find_coauthors_by_id.side_effect = Author.DoesNotExist(Author)
             request = factory.get("/coauthors/1/")
             response = CoAuthorsViewSet.as_view({"get": "coauthors_by_id"})(
                 request, pk="1"
@@ -383,9 +400,10 @@ class CoAuthorsViewSetTests(APITestCase):
         self.assertEqual(response.data["error"], "Author not found.")
 
     def test_coauthors_by_id_handles_generic_error(self):
-        with patch.object(
-            CoAuthorsViewSet, "co_author_service"
-        ) as mock_service, patch.object(CoAuthorsViewSet, "author_service"):
+        with (
+            patch.object(CoAuthorsViewSet, "co_author_service") as mock_service,
+            patch.object(CoAuthorsViewSet, "author_service"),
+        ):
             mock_service.find_coauthors_by_id.side_effect = RuntimeError("boom")
             request = factory.get("/coauthors/1/")
             response = CoAuthorsViewSet.as_view({"get": "coauthors_by_id"})(
@@ -432,7 +450,7 @@ class TopicViewSetTests(APITestCase):
         with patch.object(TopicViewSet, "topic_service") as mock_service:
             mock_service.find_all.side_effect = RuntimeError("boom")
             request = factory.get("/topics/")
-            with self.assertRaises(Exception):
+            with self.assertRaisesRegex(Exception, "boom"):
                 TopicViewSet.as_view({"get": "list"})(request)
 
 

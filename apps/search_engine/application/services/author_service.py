@@ -16,7 +16,7 @@ class AuthorService(AuthorRepository):
             authors = [Author.inflate(row[0]) for row in results]
             return authors
         except Exception as e:
-            raise ValueError(f"Error finding authors no updated: {e}")
+            raise ValueError(f"Error finding authors no updated: {e}") from e
 
     def get_authors_no_updated_count(self) -> int:
         try:
@@ -25,7 +25,7 @@ class AuthorService(AuthorRepository):
             authors_no_updated = results[0][0]
             return authors_no_updated
         except Exception as e:
-            raise ValueError(f"Error finding authors no updated count: {e}")
+            raise ValueError(f"Error finding authors no updated count: {e}") from e
 
     def authors_count(self) -> int:
         try:
@@ -34,7 +34,7 @@ class AuthorService(AuthorRepository):
             total_authors = results[0][0]
             return total_authors
         except Exception as e:
-            raise ValueError(f"Error finding total authors: {e}")
+            raise ValueError(f"Error finding total authors: {e}") from e
 
     def find_most_relevant_authors_by_topic(self, topic: str, authors_number: int):
         try:
@@ -66,7 +66,7 @@ class AuthorService(AuthorRepository):
             return authors
 
         except Exception as e:
-            raise Exception(f"Error finding most relevant authors by topic: {e}")
+            raise Exception(f"Error finding most relevant authors by topic: {e}") from e
 
     def find_community(self, authors_ids: list[str]):
         try:
@@ -76,7 +76,8 @@ class AuthorService(AuthorRepository):
             query_links = """
                   WITH $auth_list as authList
                   MATCH (au1:Author)-[r:CO_AUTHORED]-(au2:Author)
-                  WHERE au1.scopus_id IN authList AND au2.scopus_id IN authList AND au1 > au2
+                  WHERE au1.scopus_id IN authList AND au2.scopus_id IN authList
+                    AND au1 > au2
                   RETURN collect({source: au1.scopus_id, target: au2.scopus_id,
                       collabStrength: toFloat(r.collab_strength)}) as links
                   """
@@ -94,7 +95,7 @@ class AuthorService(AuthorRepository):
                 "size_links": len(links),
             }
         except Exception as e:
-            raise Exception(f"Error finding community: {e}")
+            raise Exception(f"Error finding community: {e}") from e
 
     def find_authors_by_affiliation_filter(
         self, filter_type: str, affiliations_ids: list[str], authors_ids: list[str]
@@ -106,13 +107,15 @@ class AuthorService(AuthorRepository):
             if filter_type == "include":
                 query = """
                    MATCH (a:Author)-[:AFFILIATED_WITH]->(aff:Affiliation)
-                   WHERE a.scopus_id IN $authors_ids AND aff.scopus_id IN $affiliations_ids
+                   WHERE a.scopus_id IN $authors_ids
+                     AND aff.scopus_id IN $affiliations_ids
                    RETURN a
                    """
             else:
                 query = """
                    MATCH (a:Author)-[:AFFILIATED_WITH]->(aff:Affiliation)
-                   WHERE a.scopus_id IN $authors_ids AND NOT aff.scopus_id IN $affiliations_ids
+                   WHERE a.scopus_id IN $authors_ids
+                     AND NOT aff.scopus_id IN $affiliations_ids
                    RETURN a
                    """
             results, _ = db.cypher_query(
@@ -129,7 +132,7 @@ class AuthorService(AuthorRepository):
             return authors
 
         except Exception as e:
-            raise Exception(f"Error finding authors by affiliation filter: {e}")
+            raise Exception(f"Error finding authors by affiliation filter: {e}") from e
 
     def _build_diacritic_regex(self, text: str) -> str:
         mapping = {
@@ -203,13 +206,13 @@ class AuthorService(AuthorRepository):
             authors = [Author.inflate(row[0]) for row in results]
             return authors
         except Exception as e:
-            raise Exception(f"Error finding all authors: {e}")
+            raise Exception(f"Error finding all authors: {e}") from e
 
     def find_by_id(self, scopus_id) -> Author:
         try:
             return Author.nodes.get(scopus_id=scopus_id)
         except Exception as e:
-            raise Exception(f"Error finding author by id: {e}")
+            raise Exception(f"Error finding author by id: {e}") from e
 
     def save(self, author) -> Author:
         pass
@@ -221,4 +224,4 @@ class AuthorService(AuthorRepository):
         try:
             return Author.get_or_create(*authors)
         except Exception as e:
-            raise Exception(f"Error bulk creating authors: {e}")
+            raise Exception(f"Error bulk creating authors: {e}") from e

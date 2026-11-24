@@ -1,22 +1,22 @@
 from unittest import TestCase
 from unittest.mock import Mock
 
-from apps.search_engine.application.usecases.affiliation.affiliations_by_authors_usecase import (
+from apps.search_engine.application.usecases.affiliation.affiliations_by_authors_usecase import (  # noqa: E501
     AffiliationByAuthorsUsecase,
 )
 from apps.search_engine.application.usecases.affiliation.find_affiliation_by_id import (
     FindAffiliationByScopusIdIUseCase,
 )
-from apps.search_engine.application.usecases.affiliation.list_all_affiliation_usecase import (
+from apps.search_engine.application.usecases.affiliation.list_all_affiliation_usecase import (  # noqa: E501
     ListAllAffiliationsUseCase,
 )
-from apps.search_engine.application.usecases.affiliation.total_affiliations_usecase import (
+from apps.search_engine.application.usecases.affiliation.total_affiliations_usecase import (  # noqa: E501
     TotalAffiliationsUseCase,
 )
 from apps.search_engine.application.usecases.article.article_by_id_usecase import (
     ArticleByIdUseCase,
 )
-from apps.search_engine.application.usecases.article.articles_bulk_create_usecase import (
+from apps.search_engine.application.usecases.article.articles_bulk_create_usecase import (  # noqa: E501
     ArticlesBulkCreateUseCase,
 )
 from apps.search_engine.application.usecases.article.list_all_articles_usecase import (
@@ -25,7 +25,7 @@ from apps.search_engine.application.usecases.article.list_all_articles_usecase i
 from apps.search_engine.application.usecases.article.total_articles_usecase import (
     TotalArticlesUseCase,
 )
-from apps.search_engine.application.usecases.author.author_by_affiliations_filters import (
+from apps.search_engine.application.usecases.author.author_by_affiliations_filters import (  # noqa: E501
     AuthorsByAffiliationsFiltersUseCase,
 )
 from apps.search_engine.application.usecases.author.author_by_id_usecase import (
@@ -43,13 +43,13 @@ from apps.search_engine.application.usecases.author.authors_bulk_create_usecase 
 from apps.search_engine.application.usecases.author.list_all_authors_usecase import (
     ListAllAuthorsUseCase,
 )
-from apps.search_engine.application.usecases.author.most_relevant_authors_by_topic import (
+from apps.search_engine.application.usecases.author.most_relevant_authors_by_topic import (  # noqa: E501
     MostRelevantAuthorsByTopicUseCase,
 )
 from apps.search_engine.application.usecases.author.retrieve_author_usecase import (
     RetrieveAuthorUseCase,
 )
-from apps.search_engine.application.usecases.coauthored.find_coauthors_by_id_usecase import (
+from apps.search_engine.application.usecases.coauthored.find_coauthors_by_id_usecase import (  # noqa: E501
     FindCoauthorsByIdUsecase,
 )
 from apps.search_engine.application.usecases.summary.get_summary_usecase import (
@@ -133,9 +133,7 @@ class UseCaseDelegationTests(TestCase):
         repo = Mock()
         repo.find_authors_by_query.return_value = (["a"], 1)
         result = AuthorByQueryUseCase(repo).execute(name="ana", page_size=10, page=1)
-        repo.find_authors_by_query.assert_called_once_with(
-            "ana", page_size=10, page=1
-        )
+        repo.find_authors_by_query.assert_called_once_with("ana", page_size=10, page=1)
         self.assertEqual(result, (["a"], 1))
 
     def test_authors_community(self):

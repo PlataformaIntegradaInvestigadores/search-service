@@ -16,7 +16,7 @@ class ModelCorpusObserverService:
             corpus_path = base_path + "corpus-" + modelo + "-" + version + ".pkl"
             self.corpus_path = corpus_path
         except Exception as e:
-            raise Exception("Error building model path: " + str(e))
+            raise Exception("Error building model path: " + str(e)) from e
 
     def build_model_path(self):
         try:
@@ -25,19 +25,19 @@ class ModelCorpusObserverService:
             model_path = base_path + "model-" + version + ".pkl"
             self.model_path = model_path
         except Exception as e:
-            raise Exception("Error building corpus path: " + str(e))
+            raise Exception("Error building corpus path: " + str(e)) from e
 
     def verify_corpus_path_exists(self) -> bool:
         try:
             return os.path.exists(self.corpus_path)
         except Exception as e:
-            raise Exception("Error verifying model path exists: " + str(e))
+            raise Exception("Error verifying model path exists: " + str(e)) from e
 
     def verify_model_path_exists(self) -> bool:
         try:
             return os.path.exists(self.model_path)
         except Exception as e:
-            raise Exception("Error verifying corpus path exists: " + str(e))
+            raise Exception("Error verifying corpus path exists: " + str(e)) from e
 
     def delete_corpus(self) -> bool:
         try:
@@ -46,7 +46,7 @@ class ModelCorpusObserverService:
             os.remove(self.corpus_path)
             return True
         except Exception as e:
-            raise Exception("Error deleting corpus: " + str(e))
+            raise Exception("Error deleting corpus: " + str(e)) from e
 
     def delete_model(self) -> bool:
         try:
@@ -55,4 +55,4 @@ class ModelCorpusObserverService:
             os.remove(self.model_path)
             return True
         except Exception as e:
-            raise Exception("Error deleting model: " + str(e))
+            raise Exception("Error deleting model: " + str(e)) from e

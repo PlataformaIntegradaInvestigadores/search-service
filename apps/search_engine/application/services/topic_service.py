@@ -30,4 +30,4 @@ class TopicService(TopicRepository):
             results, meta = db.cypher_query(query)
             return results[0][0]
         except Exception as e:
-            raise Exception(e)
+            raise Exception(e) from e

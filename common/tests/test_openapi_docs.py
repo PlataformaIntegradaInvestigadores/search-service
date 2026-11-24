@@ -64,9 +64,7 @@ class OpenAPIDocumentationTests(SimpleTestCase):
         self.assertEqual(used, set(names))
 
     def test_every_route_in_the_table_exists_and_every_route_is_documented(self):
-        published = {
-            (method, path) for path, method, _ in self.operations()
-        }
+        published = {(method, path) for path, method, _ in self.operations()}
         for method, key in OPERATIONS:
             self.assertIn((method.lower(), "/v1" + key), published, key)
         documented = {(m.lower(), "/v1" + k) for (m, k) in OPERATIONS}
