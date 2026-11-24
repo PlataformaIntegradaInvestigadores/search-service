@@ -19,7 +19,10 @@ from apps.dashboards.utils.utils import (
 
 
 class Command(BaseCommand):
-    help = "ETL incremental: sincroniza Neo4j → MongoDB usando upsert masivo (sin borrar datos existentes)"
+    help = (
+        "ETL incremental: sincroniza Neo4j → MongoDB usando upsert masivo (sin borrar "
+        "datos existentes)"
+    )
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -814,7 +817,8 @@ class Command(BaseCommand):
                 continue
             if dry_run:
                 self.stdout.write(
-                    f"  [DRY-RUN] {label} / {col_name}: {len(ops)} operaciones pendientes."
+                    f"  [DRY-RUN] {label} / {col_name}: {len(ops)} operaciones "
+                    "pendientes."
                 )
                 continue
             try:

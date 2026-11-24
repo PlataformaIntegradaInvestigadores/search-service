@@ -8,13 +8,13 @@ from apps.search_engine.application.services.affiliation_service import (
 from apps.search_engine.application.usecases.affiliation.find_affiliation_by_id import (
     FindAffiliationByScopusIdIUseCase,
 )
-from apps.search_engine.application.usecases.affiliation.list_all_affiliation_usecase import (
+from apps.search_engine.application.usecases.affiliation.list_all_affiliation_usecase import (  # noqa: E501
     ListAllAffiliationsUseCase,
 )
-from apps.search_engine.application.usecases.affiliation.total_affiliations_usecase import (
+from apps.search_engine.application.usecases.affiliation.total_affiliations_usecase import (  # noqa: E501
     TotalAffiliationsUseCase,
 )
-from apps.search_engine.infrastructure.api.v1.serializers.affiliation_serializers import (
+from apps.search_engine.infrastructure.api.v1.serializers.affiliation_serializers import (  # noqa: E501
     AffiliationSerializer,
 )
 from apps.search_engine.infrastructure.api.v1.utils.build_paginator import (

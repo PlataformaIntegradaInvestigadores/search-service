@@ -14,7 +14,9 @@ from apps.dashboards.domain.entities.affiliation_topics import AffiliationTopics
 from apps.dashboards.domain.entities.affiliation_topics_acumulated import (
     AffiliationTopicsAcumulated,
 )
-from apps.dashboards.domain.entities.affiliation_topics_year import AffiliationTopicsYear
+from apps.dashboards.domain.entities.affiliation_topics_year import (
+    AffiliationTopicsYear,
+)
 from apps.dashboards.domain.entities.affiliation_year import AffiliationYear
 from apps.dashboards.domain.entities.affiliation_year_acumulated import (
     AffiliationAcumulated,
@@ -42,7 +44,9 @@ from apps.dashboards.domain.entities.province_topics_acumulated import (
 from apps.dashboards.domain.entities.province_topics_year import ProvinceTopicsYear
 from apps.dashboards.domain.entities.province_year import ProvinceYear
 
-CYPHER_QUERY_PATH = "apps.dashboards.application.services.populate_service.db.cypher_query"
+CYPHER_QUERY_PATH = (
+    "apps.dashboards.application.services.populate_service.db.cypher_query"
+)
 
 
 class PopulateServiceBase(TestCase):
@@ -70,7 +74,9 @@ class PopulateProvinceTests(PopulateServiceBase):
         self.assertEqual(provinces[0].total_articles, 2)
         years = {p.year: p.total_articles for p in ProvinceYear.objects.all()}
         self.assertEqual(years, {2020: 1, 2021: 1})
-        acumulated = {p.year: p.total_articles for p in ProvinceAcumulated.objects.all()}
+        acumulated = {
+            p.year: p.total_articles for p in ProvinceAcumulated.objects.all()
+        }
         self.assertEqual(acumulated, {2020: 1, 2021: 2})
         topics_year = list(ProvinceTopicsYear.objects.all())
         self.assertEqual(len(topics_year), 2)
@@ -101,9 +107,7 @@ class PopulateAuthorTests(PopulateServiceBase):
         author_years = {
             (a.scopus_id, a.year): a.total_articles for a in AuthorYear.objects.all()
         }
-        self.assertEqual(
-            author_years, {(1, 2020): 1, (1, 2021): 1, (2, 2020): 1}
-        )
+        self.assertEqual(author_years, {(1, 2020): 1, (1, 2021): 1, (2, 2020): 1})
         acumulated = {
             (a.scopus_id, a.year): a.total_articles
             for a in AuthorAcumulated.objects.all()
@@ -175,7 +179,9 @@ class PopulateOrchestratorTests(PopulateServiceBase):
         call_order = []
         with (
             patch.object(
-                self.service, "drop_database", side_effect=lambda: call_order.append("drop")
+                self.service,
+                "drop_database",
+                side_effect=lambda: call_order.append("drop"),
             ),
             patch.object(
                 self.service,

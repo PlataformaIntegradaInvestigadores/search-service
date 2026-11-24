@@ -7,6 +7,7 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
 from common.admin_permission import IsCentinelaAdmin
 
 logger = logging.getLogger(__name__)
@@ -80,7 +81,8 @@ class EtlRunView(APIView):
     @extend_schema(
         summary="Estado del ETL",
         description=(
-            'Devuelve {status: "running"|"idle"} para que el frontend pueda hacer polling, '
+            'Devuelve {status: "running"|"idle"} para que el frontend pueda hacer '
+            "polling, "
             "junto con la marca de tiempo y resultado de la última ejecución conocida."
         ),
         tags=["Admin – ETL"],

@@ -97,7 +97,8 @@ class PopulateService(PopulateRepository):
         query = """
             MATCH (ar:Article)-[b:BELONGS_TO]->(af:Affiliation)
             OPTIONAL MATCH (ar)-[u:USES]->(t:Topic)
-            RETURN af.scopus_id, af.name, af.city, ar.scopus_id, ar.publication_date, t.name
+            RETURN af.scopus_id, af.name, af.city,
+                   ar.scopus_id, ar.publication_date, t.name
         """
         results, meta = db.cypher_query(query)
 
@@ -748,7 +749,8 @@ class PopulateService(PopulateRepository):
                 )
                 affiliation_acumulated.save()
 
-            # Mapeo para AffiliationTopicsYear, AffiliationTopicsAcumulated y AffiliationTopics
+            # Mapeo para AffiliationTopicsYear, AffiliationTopicsAcumulated y
+            # AffiliationTopics
             topic_totals = {}
             for topic_data in affiliation_data["topics"]:
                 topic_name = topic_data["topic_name"]
@@ -772,13 +774,13 @@ class PopulateService(PopulateRepository):
                     #     counted_topics.add(topic_name)
                     #     acumulated_topic_articles += year_data["num_articles"]
                     # else:
-                    #     previous_acumulated = AffiliationTopicsAcumulated.objects.filter(scopus_id=scopus_id,
-                    #                                                                      name=name,
-                    #                                                                      topic_name=topic_name,
-                    #                                                                      year__lt=year).order_by(
+                    #     previous_acumulated = AffiliationTopicsAcumulated.objects.filter(scopus_id=scopus_id,  # noqa: E501
+                    #                                                                      name=name,  # noqa: E501
+                    #                                                                      topic_name=topic_name,  # noqa: E501
+                    #                                                                      year__lt=year).order_by(  # noqa: E501
                     #         '-year').first()
                     #     if previous_acumulated:
-                    #         acumulated_topic_articles = previous_acumulated.total_articles
+                    #         acumulated_topic_articles = previous_acumulated.total_articles  # noqa: E501
 
                     affiliation_topics_acumulated = AffiliationTopicsAcumulated(
                         scopus_id=scopus_id,
@@ -808,10 +810,12 @@ class PopulateService(PopulateRepository):
         pass
 
     def get_affiliations_authors_dict(self):
-        query = """
+        # Not implemented yet: the query is kept as the starting point.
+        _query = """
                             MATCH (ar:Article)-[b:BELONGS_TO]->(af:Affiliation)
                             OPTIONAL MATCH (ar)-[u:USES]->(t:Topic)
-                            RETURN af.scopus_id, af.name, ar.scopus_id, ar.publication_date, t.name
+                            RETURN af.scopus_id, af.name,
+                                   ar.scopus_id, ar.publication_date, t.name
                         """
 
     def get_affiliations_topics_dict(self):
@@ -821,7 +825,8 @@ class PopulateService(PopulateRepository):
         query = """
                     MATCH (ar:Article)-[b:BELONGS_TO]->(af:Affiliation)
                     OPTIONAL MATCH (ar)-[u:USES]->(t:Topic)
-                    RETURN af.scopus_id, af.name, ar.scopus_id, ar.publication_date, t.name
+                    RETURN af.scopus_id, af.name,
+                           ar.scopus_id, ar.publication_date, t.name
                 """
         results, meta = db.cypher_query(query)
 

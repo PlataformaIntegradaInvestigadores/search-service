@@ -178,4 +178,4 @@ class Author(DjangoNode):
                 logging.ERROR,
                 f"Error updating author from json: {e} scopus_id: {scopus_id}",
             )
-            raise ValueError("Error updating author from json: " + str(e))
+            raise ValueError("Error updating author from json: " + str(e)) from e

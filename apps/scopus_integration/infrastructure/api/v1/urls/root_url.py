@@ -7,7 +7,7 @@ from apps.scopus_integration.infrastructure.api.v1.views.corpus_modeling_views i
 from apps.scopus_integration.infrastructure.api.v1.views.model_generation_views import (
     GenerateModelView,
 )
-from apps.scopus_integration.infrastructure.api.v1.views.scopus_integration_views import (
+from apps.scopus_integration.infrastructure.api.v1.views.scopus_integration_views import (  # noqa: E501
     ScopusIntegrationViewSet,
 )
 

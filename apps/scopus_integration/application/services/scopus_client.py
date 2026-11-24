@@ -57,4 +57,4 @@ class ScopusClient:
         except requests.HTTPError as e:
             raise e
         except Exception as e:
-            raise Exception(f"Error executing request: {e}")
+            raise Exception(f"Error executing request: {e}") from e

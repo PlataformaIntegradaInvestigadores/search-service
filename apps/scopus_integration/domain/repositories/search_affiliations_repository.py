@@ -87,7 +87,8 @@ class SearchAffiliationRepository:
 
                     logger.info(f"Current results {self.num_res} of {self.tot_num_res}")
 
-                    # If cursor is in existing_cursors, it means that the search was already done
+                    # If cursor is in existing_cursors, it means that the search was
+                    # already done
                     if cursor in existing_cursors:
                         while True:
                             if not next_url:

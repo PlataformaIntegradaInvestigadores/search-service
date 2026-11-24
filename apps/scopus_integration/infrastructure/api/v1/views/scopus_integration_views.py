@@ -53,7 +53,7 @@ class ScopusIntegrationViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         # Se podria descomentar para tener solo una instancia corriendo
         # if not self.lock.acquire(blocking=False):
-        #     return Response({"success": False, "message": "Another instance is already running."},
+        #     return Response({"success": False, "message": "Another instance is already running."},  # noqa: E501
         #                     status=status.HTTP_429_TOO_MANY_REQUESTS)
         year = request.query_params.get("year")
         try:

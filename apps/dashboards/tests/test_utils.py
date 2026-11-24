@@ -125,7 +125,9 @@ class CountArticlesPerYearAuthorTests(SimpleTestCase):
 class CountArticlesPerYearCountryTests(SimpleTestCase):
     def test_aggregates_unique_articles(self):
         result = count_articles_per_year_country(
-            articles_id=[1, 1, 2], years=["2020", "2020", "2021"], topics=["IA", "IA", "ML"]
+            articles_id=[1, 1, 2],
+            years=["2020", "2020", "2021"],
+            topics=["IA", "IA", "ML"],
         )
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["totalArticles"], 2)

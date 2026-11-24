@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pandas as pd
@@ -14,9 +14,12 @@ from apps.search_engine.application.services.llm_search_service import (
 
 
 def _make_processor():
-    with patch("apps.search_engine.application.services.llm_search_service.spacy.load"), patch(
-        "apps.search_engine.application.services.llm_search_service.stopwords.words",
-        return_value=["the", "a", "is"],
+    with (
+        patch("apps.search_engine.application.services.llm_search_service.spacy.load"),
+        patch(
+            "apps.search_engine.application.services.llm_search_service.stopwords.words",
+            return_value=["the", "a", "is"],
+        ),
     ):
         return QueryProcessor(
             kw_model=MagicMock(), translator=MagicMock(), scibert_model=MagicMock()
@@ -36,12 +39,15 @@ class QueryProcessorTests(SimpleTestCase):
         self.assertEqual(lang, "es")
 
     def test_detect_language_uses_langdetect_when_not_spanish(self):
-        with patch(
-            "apps.search_engine.application.services.llm_search_service.stopwords.words",
-            return_value=["el", "la"],
-        ), patch(
-            "apps.search_engine.application.services.llm_search_service.langdetect.detect",
-            return_value="fr",
+        with (
+            patch(
+                "apps.search_engine.application.services.llm_search_service.stopwords.words",
+                return_value=["el", "la"],
+            ),
+            patch(
+                "apps.search_engine.application.services.llm_search_service.langdetect.detect",
+                return_value="fr",
+            ),
         ):
             lang = self.processor.detect_language("bonjour tout le monde")
         self.assertEqual(lang, "fr")
@@ -242,9 +248,7 @@ class LLMSearchServiceTests(SimpleTestCase):
         self.assertIs(first, second)
 
     def test_initialize_components_only_runs_once(self):
-        with patch.object(
-            LLMSearchService, "initialize_components"
-        ) as mock_init:
+        with patch.object(LLMSearchService, "initialize_components") as mock_init:
             LLMSearchService()
             LLMSearchService()
         mock_init.assert_called_once()
@@ -254,24 +258,29 @@ class LLMSearchServiceTests(SimpleTestCase):
         service.scibert_model_path = "x"
         service.keybert_path = "y"
         service.embeddings_path = "z"
-        with patch(
-            "apps.search_engine.application.services.llm_search_service.spacy.util.is_package",
-            return_value=False,
-        ), patch(
-            "apps.search_engine.application.services.llm_search_service.spacy.cli.download"
-        ) as mock_download, patch(
-            "apps.search_engine.application.services.llm_search_service.SentenceTransformer"
-        ), patch(
-            "apps.search_engine.application.services.llm_search_service.KeyBERT"
-        ), patch(
-            "apps.search_engine.application.services.llm_search_service.GoogleTranslator"
-        ), patch(
-            "apps.search_engine.application.services.llm_search_service.QueryProcessor"
-        ), patch(
-            "apps.search_engine.application.services.llm_search_service.np.load",
-            return_value=np.array([[1.0]]),
-        ), patch.object(
-            service, "get_corpus_from_neo4j", return_value=pd.DataFrame()
+        with (
+            patch(
+                "apps.search_engine.application.services.llm_search_service.spacy.util.is_package",
+                return_value=False,
+            ),
+            patch(
+                "apps.search_engine.application.services.llm_search_service.spacy.cli.download"
+            ) as mock_download,
+            patch(
+                "apps.search_engine.application.services.llm_search_service.SentenceTransformer"
+            ),
+            patch("apps.search_engine.application.services.llm_search_service.KeyBERT"),
+            patch(
+                "apps.search_engine.application.services.llm_search_service.GoogleTranslator"
+            ),
+            patch(
+                "apps.search_engine.application.services.llm_search_service.QueryProcessor"
+            ),
+            patch(
+                "apps.search_engine.application.services.llm_search_service.np.load",
+                return_value=np.array([[1.0]]),
+            ),
+            patch.object(service, "get_corpus_from_neo4j", return_value=pd.DataFrame()),
         ):
             service.initialize_components()
         mock_download.assert_called_once_with("en_core_web_sm")
@@ -336,11 +345,14 @@ class LLMSearchServiceTests(SimpleTestCase):
         service.scibert_model = MagicMock()
         service.corpus_embeddings = np.array([[1.0, 0.0]])
 
-        with patch(
-            "apps.search_engine.application.services.llm_search_service.BM25Retriever"
-        ) as mock_bm25_cls, patch(
-            "apps.search_engine.application.services.llm_search_service.DenseRetriever"
-        ) as mock_dense_cls:
+        with (
+            patch(
+                "apps.search_engine.application.services.llm_search_service.BM25Retriever"
+            ) as mock_bm25_cls,
+            patch(
+                "apps.search_engine.application.services.llm_search_service.DenseRetriever"
+            ) as mock_dense_cls,
+        ):
             mock_bm25_cls.return_value.retrieve.return_value = [{"id": 0}]
             mock_dense_cls.return_value.retrieve.return_value = [
                 {"id": 0, "score": 0.9}
@@ -370,14 +382,20 @@ class LLMSearchServiceTests(SimpleTestCase):
         service.scibert_model = MagicMock()
         service.corpus_embeddings = np.array([[1.0, 0.0]])
 
-        with patch(
-            "apps.search_engine.application.services.llm_search_service.HydeBM25Retriever"
-        ) as mock_hyde_cls, patch(
-            "apps.search_engine.application.services.llm_search_service.BM25Retriever"
-        ) as mock_bm25_cls, patch(
-            "apps.search_engine.application.services.llm_search_service.DenseRetriever"
-        ) as mock_dense_cls:
-            mock_hyde_cls.return_value.expand_query.return_value = "enhanced\nhypothetical"
+        with (
+            patch(
+                "apps.search_engine.application.services.llm_search_service.HydeBM25Retriever"
+            ) as mock_hyde_cls,
+            patch(
+                "apps.search_engine.application.services.llm_search_service.BM25Retriever"
+            ) as mock_bm25_cls,
+            patch(
+                "apps.search_engine.application.services.llm_search_service.DenseRetriever"
+            ) as mock_dense_cls,
+        ):
+            mock_hyde_cls.return_value.expand_query.return_value = (
+                "enhanced\nhypothetical"
+            )
             mock_bm25_cls.return_value.retrieve.return_value = [{"id": 0}]
             mock_dense_cls.return_value.retrieve.return_value = [
                 {"id": 0, "score": 0.9}

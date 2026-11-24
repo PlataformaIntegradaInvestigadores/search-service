@@ -36,22 +36,22 @@ from apps.dashboards.domain.entities.country_topics_acumulated import (
     CountryTopicsAcumulated,
 )
 from apps.dashboards.domain.entities.country_topics_year import CountryTopicsYear
-from apps.dashboards.infrastructure.api.v1.serializers.affiliation_topic_serializer import (
+from apps.dashboards.infrastructure.api.v1.serializers.affiliation_topic_serializer import (  # noqa: E501
     AffiliationTopicYearSerializer,
 )
-from apps.dashboards.infrastructure.api.v1.serializers.affiliation_topics_acumulated_serializer import (
+from apps.dashboards.infrastructure.api.v1.serializers.affiliation_topics_acumulated_serializer import (  # noqa: E501
     AffiliationTopicAcumulatedSerializer,
 )
-from apps.dashboards.infrastructure.api.v1.serializers.affiliation_topics_serializer import (
+from apps.dashboards.infrastructure.api.v1.serializers.affiliation_topics_serializer import (  # noqa: E501
     AffiliationTopicsSerializer,
 )
-from apps.dashboards.infrastructure.api.v1.serializers.country_acumulated_serializer import (
+from apps.dashboards.infrastructure.api.v1.serializers.country_acumulated_serializer import (  # noqa: E501
     CountryAcumulatedSerializer,
 )
-from apps.dashboards.infrastructure.api.v1.serializers.country_topics_serializer import (
+from apps.dashboards.infrastructure.api.v1.serializers.country_topics_serializer import (  # noqa: E501
     CountryTopicsSerializer,
 )
-from apps.dashboards.infrastructure.api.v1.serializers.country_topics_year_serializer import (
+from apps.dashboards.infrastructure.api.v1.serializers.country_topics_year_serializer import (  # noqa: E501
     CountryTopicsYearSerializer,
 )
 from apps.dashboards.infrastructure.api.v1.serializers.country_year_serializer import (
@@ -778,4 +778,3 @@ class CountryViews(viewsets.ModelViewSet):
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-

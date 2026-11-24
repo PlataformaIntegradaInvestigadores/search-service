@@ -7,11 +7,12 @@ from apps.dashboards.application.services.country_service import CountryService
 from apps.dashboards.application.services.populate_service import PopulateService
 from apps.dashboards.application.services.province_service import ProvinceService
 from apps.dashboards.domain.entities.affiliation import Affiliation
-from apps.dashboards.domain.entities.affiliation_topics import AffiliationTopics
 from apps.dashboards.domain.entities.affiliation_topics_acumulated import (
     AffiliationTopicsAcumulated,
 )
-from apps.dashboards.domain.entities.affiliation_topics_year import AffiliationTopicsYear
+from apps.dashboards.domain.entities.affiliation_topics_year import (
+    AffiliationTopicsYear,
+)
 from apps.dashboards.domain.entities.affiliation_year import AffiliationYear
 from apps.dashboards.domain.entities.affiliation_year_acumulated import (
     AffiliationAcumulated,
@@ -179,9 +180,7 @@ class AffiliationServiceTests(TestCase):
         AffiliationAcumulated.objects.create(
             scopus_id=1, name="Uni A", year=2020, total_articles=5, total_topics=1
         )
-        self.assertEqual(
-            self.service.get_affiliation_year(1, 2020).total_articles, 5
-        )
+        self.assertEqual(self.service.get_affiliation_year(1, 2020).total_articles, 5)
         self.assertEqual(
             self.service.get_affiliation_year_acumulated(1, 2020).total_articles, 5
         )
@@ -205,7 +204,9 @@ class AffiliationServiceTests(TestCase):
         AffiliationAcumulated.objects.create(
             scopus_id=2, name="Uni B", year=2020, total_articles=15, total_topics=1
         )
-        result = [a.scopus_id for a in self.service.get_top_affiliations_acumulated(2020)]
+        result = [
+            a.scopus_id for a in self.service.get_top_affiliations_acumulated(2020)
+        ]
         self.assertEqual(result, [2, 1])
 
     def test_get_last_years_excludes_pre_2000(self):

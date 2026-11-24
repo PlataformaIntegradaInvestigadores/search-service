@@ -9,10 +9,10 @@ from apps.search_engine.application.services.affiliation_service import (
     AffiliationService,
 )
 from apps.search_engine.application.services.author_service import AuthorService
-from apps.search_engine.application.usecases.affiliation.affiliations_by_authors_usecase import (
+from apps.search_engine.application.usecases.affiliation.affiliations_by_authors_usecase import (  # noqa: E501
     AffiliationByAuthorsUsecase,
 )
-from apps.search_engine.application.usecases.author.author_by_affiliations_filters import (
+from apps.search_engine.application.usecases.author.author_by_affiliations_filters import (  # noqa: E501
     AuthorsByAffiliationsFiltersUseCase,
 )
 from apps.search_engine.application.usecases.author.author_by_id_usecase import (
@@ -27,10 +27,10 @@ from apps.search_engine.application.usecases.author.author_community_use_case im
 from apps.search_engine.application.usecases.author.list_all_authors_usecase import (
     ListAllAuthorsUseCase,
 )
-from apps.search_engine.application.usecases.author.most_relevant_authors_by_topic import (
+from apps.search_engine.application.usecases.author.most_relevant_authors_by_topic import (  # noqa: E501
     MostRelevantAuthorsByTopicUseCase,
 )
-from apps.search_engine.infrastructure.api.v1.serializers.affiliation_serializers import (
+from apps.search_engine.infrastructure.api.v1.serializers.affiliation_serializers import (  # noqa: E501
     AffiliationNameSerializer,
 )
 from apps.search_engine.infrastructure.api.v1.serializers.author_serializers import (

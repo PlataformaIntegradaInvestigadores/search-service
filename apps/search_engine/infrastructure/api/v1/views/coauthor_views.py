@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from apps.search_engine.application.services.author_service import AuthorService
 from apps.search_engine.application.services.coauthored_service import CoAuthoredService
-from apps.search_engine.application.usecases.coauthored.find_coauthors_by_id_usecase import (
+from apps.search_engine.application.usecases.coauthored.find_coauthors_by_id_usecase import (  # noqa: E501
     FindCoauthorsByIdUsecase,
 )
 from apps.search_engine.infrastructure.api.v1.serializers.author_serializers import (

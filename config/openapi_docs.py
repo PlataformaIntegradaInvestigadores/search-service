@@ -135,7 +135,7 @@ científica. Trabaja sobre el corpus de artículos de Scopus almacenado en dos b
   contraseña. Sin ellas responden `403`.
 * Para búsquedas con validación de contrato y formato de error uniforme, el
   frontend usa la API intermedia `/api/search/v2`.
-"""
+"""  # noqa: E501
 
 # --------------------------------------------------------------- parametros
 YEAR_NOTE = "Año de cuatro cifras, por ejemplo `2023`."

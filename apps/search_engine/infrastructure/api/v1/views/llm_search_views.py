@@ -179,11 +179,14 @@ class LLMSearchViewSet(viewsets.ViewSet):
             if not qa_pairs:
                 return Response(
                     _error_payload(
-                        result.status
-                        if str(result.status).startswith("error")
-                        else (
-                            "error: la respuesta de generación está vacía o no tiene "
-                            "pares pregunta/respuesta válidos"
+                        (
+                            result.status
+                            if str(result.status).startswith("error")
+                            else (
+                                "error: la respuesta de generación está vacía o no "
+                                "tiene "
+                                "pares pregunta/respuesta válidos"
+                            )
                         ),
                         raw_response=result.final_raw_response or "",
                         intentos=result.intentos_utilizados,

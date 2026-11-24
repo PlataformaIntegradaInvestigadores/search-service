@@ -15,28 +15,27 @@ from rest_framework import status
 from rest_framework.test import APIRequestFactory as BaseAPIRequestFactory
 from rest_framework.test import APITestCase
 
-from common.admin_permission import issue_admin_token
-
+import apps.scopus_integration.infrastructure.api.v1.views.etl_views as etl_views_module
 from apps.scopus_integration.infrastructure.api.v1.views.corpus_modeling_views import (
     GenerateCorpusView,
 )
-from apps.scopus_integration.infrastructure.api.v1.views.dashboard_information_views import (
+from apps.scopus_integration.infrastructure.api.v1.views.dashboard_information_views import (  # noqa: E501
     DashboardInformationViewSet,
 )
 from apps.scopus_integration.infrastructure.api.v1.views.etl_views import EtlRunView
-import apps.scopus_integration.infrastructure.api.v1.views.etl_views as etl_views_module
 from apps.scopus_integration.infrastructure.api.v1.views.logger_views import (
     LoggerViewSet,
 )
 from apps.scopus_integration.infrastructure.api.v1.views.model_generation_views import (
     GenerateModelView,
 )
-from apps.scopus_integration.infrastructure.api.v1.views.scopus_integration_views import (
+from apps.scopus_integration.infrastructure.api.v1.views.scopus_integration_views import (  # noqa: E501
     ScopusIntegrationViewSet,
 )
-from apps.scopus_integration.infrastructure.api.v1.views.update_information_views import (
+from apps.scopus_integration.infrastructure.api.v1.views.update_information_views import (  # noqa: E501
     UpdateInformationViewSet,
 )
+from common.admin_permission import issue_admin_token
 
 VIEWS = "apps.scopus_integration.infrastructure.api.v1.views"
 
@@ -99,7 +98,9 @@ class GenerateModelViewTests(APITestCase):
     def test_genera_modelo_mockeando_disco(self):
         request = APIRequestFactory().post("/generate-model/")
 
-        with patch(f"{VIEWS}.model_generation_views.ModelGenerationService") as mock_svc:
+        with patch(
+            f"{VIEWS}.model_generation_views.ModelGenerationService"
+        ) as mock_svc:
             mock_instance = mock_svc.return_value
             mock_instance.read_path.return_value = {"preprocessed_doc": []}
             response = GenerateModelView.as_view()(request)
@@ -123,7 +124,9 @@ class ScopusIntegrationViewSetTests(APITestCase):
     def test_list_ejecuta_integracion_y_limpia_modelo_corpus(self):
         request = APIRequestFactory().get("/scopus-integration/")
 
-        with patch(f"{VIEWS}.scopus_integration_views.ScopusIntegrationUseCase") as mock_uc:
+        with patch(
+            f"{VIEWS}.scopus_integration_views.ScopusIntegrationUseCase"
+        ) as mock_uc:
             with patch(
                 f"{VIEWS}.scopus_integration_views.ModelCorpusObserverService"
             ) as mock_observer_cls:
@@ -255,7 +258,9 @@ class DashboardInformationViewSetTests(APITestCase):
         return DashboardInformationViewSet.as_view(method_map)
 
     def test_get_authors_comparator(self):
-        request = APIRequestFactory().get("/dashboard/information/get_authors_comparator/")
+        request = APIRequestFactory().get(
+            "/dashboard/information/get_authors_comparator/"
+        )
         vs = DashboardInformationViewSet()
         vs.author_service = MagicMock(
             get_authors_no_updated_count=MagicMock(return_value=3),
@@ -271,7 +276,9 @@ class DashboardInformationViewSetTests(APITestCase):
         self.assertEqual(response.data["total_authors"], 100)
 
     def test_get_authors_comparator_error_retorna_400(self):
-        request = APIRequestFactory().get("/dashboard/information/get_authors_comparator/")
+        request = APIRequestFactory().get(
+            "/dashboard/information/get_authors_comparator/"
+        )
         with patch.object(
             DashboardInformationViewSet,
             "author_service",
@@ -284,15 +291,20 @@ class DashboardInformationViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_get_articles_comparator(self):
-        request = APIRequestFactory().get("/dashboard/information/get_articles_comparator/")
-        with patch.object(
-            DashboardInformationViewSet,
-            "article_service",
-            MagicMock(articles_count=MagicMock(return_value=50)),
-        ), patch.object(
-            DashboardInformationViewSet,
-            "retrieve_scopus_data",
-            MagicMock(get_total_articles_from_scopus=MagicMock(return_value="60")),
+        request = APIRequestFactory().get(
+            "/dashboard/information/get_articles_comparator/"
+        )
+        with (
+            patch.object(
+                DashboardInformationViewSet,
+                "article_service",
+                MagicMock(articles_count=MagicMock(return_value=50)),
+            ),
+            patch.object(
+                DashboardInformationViewSet,
+                "retrieve_scopus_data",
+                MagicMock(get_total_articles_from_scopus=MagicMock(return_value="60")),
+            ),
         ):
             response = self._view({"get": "get_articles_comparator"})(request)
 
@@ -317,35 +329,43 @@ class DashboardInformationViewSetTests(APITestCase):
 
     def test_get_system_health_calcula_stale_collections(self):
         request = APIRequestFactory().get("/dashboard/information/get_system_health/")
-        with patch.object(
-            DashboardInformationViewSet,
-            "author_service",
-            MagicMock(
-                get_authors_no_updated_count=MagicMock(return_value=1),
-                authors_count=MagicMock(return_value=10),
+        with (
+            patch.object(
+                DashboardInformationViewSet,
+                "author_service",
+                MagicMock(
+                    get_authors_no_updated_count=MagicMock(return_value=1),
+                    authors_count=MagicMock(return_value=10),
+                ),
             ),
-        ), patch.object(
-            DashboardInformationViewSet,
-            "article_service",
-            MagicMock(articles_count=MagicMock(return_value=20)),
-        ), patch.object(
-            DashboardInformationViewSet,
-            "affiliation_service",
-            MagicMock(find_total_affiliations=MagicMock(return_value=5)),
-        ), patch.object(
-            DashboardInformationViewSet,
-            "topic_service",
-            MagicMock(topics_count=MagicMock(return_value=7)),
-        ), patch(f"{VIEWS}.dashboard_information_views.MongoAuthor") as mongo_author, patch(
-            f"{VIEWS}.dashboard_information_views.MongoAffiliation"
-        ) as mongo_affil, patch(
-            f"{VIEWS}.dashboard_information_views.CountryTopics"
-        ) as mongo_topics, patch(
-            f"{VIEWS}.dashboard_information_views.CountryAcumulated"
-        ) as mongo_acum:
+            patch.object(
+                DashboardInformationViewSet,
+                "article_service",
+                MagicMock(articles_count=MagicMock(return_value=20)),
+            ),
+            patch.object(
+                DashboardInformationViewSet,
+                "affiliation_service",
+                MagicMock(find_total_affiliations=MagicMock(return_value=5)),
+            ),
+            patch.object(
+                DashboardInformationViewSet,
+                "topic_service",
+                MagicMock(topics_count=MagicMock(return_value=7)),
+            ),
+            patch(f"{VIEWS}.dashboard_information_views.MongoAuthor") as mongo_author,
+            patch(
+                f"{VIEWS}.dashboard_information_views.MongoAffiliation"
+            ) as mongo_affil,
+            patch(f"{VIEWS}.dashboard_information_views.CountryTopics") as mongo_topics,
+            patch(
+                f"{VIEWS}.dashboard_information_views.CountryAcumulated"
+            ) as mongo_acum,
+        ):
             mongo_author.objects.count.return_value = 9
             mongo_affil.objects.count.return_value = 5
-            mongo_topics.objects.filter.return_value.filter.return_value.count.return_value = 7
+            topics_query = mongo_topics.objects.filter.return_value.filter.return_value
+            topics_query.count.return_value = 7
             mongo_acum.objects.order_by.return_value.first.return_value = MagicMock(
                 total_articles=18
             )
@@ -374,7 +394,6 @@ class DashboardInformationViewSetTests(APITestCase):
 
 class LoggerViewSetTests(APITestCase):
     def test_list_filtra_por_nivel_y_pagina(self, *_):
-        import glob
 
         request = APIRequestFactory().get(
             "/admin/logs/", {"level": "ERROR", "page": "1", "lines_per_page": "1"}
@@ -382,9 +401,12 @@ class LoggerViewSetTests(APITestCase):
         fake_lines = ["2024-01-01 INFO ok\n", "2024-01-02 ERROR bad\n"]
 
         with patch("glob.glob", return_value=["fake.log"]):
-            with patch("builtins.open", __import__("unittest.mock", fromlist=["mock_open"]).mock_open(
-                read_data="".join(fake_lines)
-            )) as m:
+            with patch(
+                "builtins.open",
+                __import__("unittest.mock", fromlist=["mock_open"]).mock_open(
+                    read_data="".join(fake_lines)
+                ),
+            ) as m:
                 m.return_value.readlines.return_value = fake_lines
                 response = LoggerViewSet.as_view({"get": "list"})(request)
 
@@ -397,7 +419,10 @@ class LoggerViewSetTests(APITestCase):
         request = APIRequestFactory().get("/admin/logs/")
 
         with patch("glob.glob", return_value=["fake.log"]):
-            with patch("builtins.open", __import__("unittest.mock", fromlist=["mock_open"]).mock_open()) as m:
+            with patch(
+                "builtins.open",
+                __import__("unittest.mock", fromlist=["mock_open"]).mock_open(),
+            ) as m:
                 m.return_value.readlines.return_value = fake_lines
                 response = LoggerViewSet.as_view({"get": "list"})(request)
 
