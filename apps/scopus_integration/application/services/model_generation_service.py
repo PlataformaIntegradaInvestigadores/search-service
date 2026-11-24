@@ -15,7 +15,7 @@ class ModelGenerationService:
                 corpus = pickle.load(fp)
                 return corpus
         except Exception as e:
-            raise Exception("Error reading path: " + str(e))
+            raise Exception("Error reading path: " + str(e)) from e
 
     @staticmethod
     def save_model(model):
@@ -26,7 +26,7 @@ class ModelGenerationService:
             with open(model_path, "wb") as fp:
                 pickle.dump(model, fp)
         except Exception as e:
-            raise Exception("Error saving model: " + str(e))
+            raise Exception("Error saving model: " + str(e)) from e
 
     def generate_model(self, corpus):
         try:
@@ -40,4 +40,4 @@ class ModelGenerationService:
             }
             self.save_model(model)
         except Exception as e:
-            raise Exception("Error generating model: " + str(e))
+            raise Exception("Error generating model: " + str(e)) from e

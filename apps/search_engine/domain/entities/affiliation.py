@@ -35,7 +35,7 @@ class Affiliation(DjangoNode):
             ).save()
             return affiliation_instance
         except Exception as e:
-            raise Exception(f"Error while processing affiliation data: {str(e)}")
+            raise Exception(f"Error while processing affiliation data: {str(e)}") from e
 
     @classmethod
     def retrieve_from_json(cls, affiliation_data):
@@ -94,7 +94,11 @@ class Affiliation(DjangoNode):
                 ).save()
                 return affiliation_instance
             except Exception as e:
-                raise Exception(f"Error while processing affiliation data: {str(e)}")
+                raise Exception(
+                    f"Error while processing affiliation data: {str(e)}"
+                ) from e
 
         except Exception as e:
-            raise Exception(f"Error while retrieving affiliation from JSON: {str(e)}")
+            raise Exception(
+                f"Error while retrieving affiliation from JSON: {str(e)}"
+            ) from e

@@ -22,7 +22,7 @@ class AffiliationService(AffiliationRepository):
         except DoesNotExist as e:
             raise e
         except Exception as e:
-            raise Exception(f"Error finding affiliations by authors: {e}")
+            raise Exception(f"Error finding affiliations by authors: {e}") from e
 
     def find_total_affiliations(self) -> int:
         try:
@@ -31,14 +31,14 @@ class AffiliationService(AffiliationRepository):
             total_affiliations = results[0][0]
             return total_affiliations
         except Exception as e:
-            raise ValueError(f"Error finding total affiliations: {e}")
+            raise ValueError(f"Error finding total affiliations: {e}") from e
 
     def find_by_id(self, scopus_id) -> object:
         try:
             affiliation = Affiliation.nodes.get_or_none(scopus_id=scopus_id)
             return affiliation
         except Exception as e:
-            raise ValueError(f"Error finding affiliation: {e}")
+            raise ValueError(f"Error finding affiliation: {e}") from e
 
     def find_by_name(self, affiliation_name: str) -> list[object]:
         pass
@@ -53,7 +53,7 @@ class AffiliationService(AffiliationRepository):
         try:
             return Affiliation.get_or_create(*affiliations)
         except Exception as e:
-            raise ValueError(f"Error creating affiliations: {e}")
+            raise ValueError(f"Error creating affiliations: {e}") from e
 
     def find_all(self, page_number: int = None, page_size: int = 10) -> list[object]:
         try:
@@ -65,4 +65,4 @@ class AffiliationService(AffiliationRepository):
             affiliations = [Affiliation.inflate(row[0]) for row in results]
             return affiliations
         except Exception as e:
-            raise ValueError(f"Error finding affiliations: {e}")
+            raise ValueError(f"Error finding affiliations: {e}") from e

@@ -5,7 +5,7 @@ from unittest.mock import patch
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from apps.authentication.infrastructure.api.v1.serializers.login_request_serializer import (
+from apps.authentication.infrastructure.api.v1.serializers.login_request_serializer import (  # noqa: E501
     LoginRequestSerializer,
 )
 

@@ -3,7 +3,7 @@ from unittest.mock import Mock
 
 import pandas as pd
 
-from apps.search_engine.application.usecases.article.most_relevant_articles_by_topic_usecase import (
+from apps.search_engine.application.usecases.article.most_relevant_articles_by_topic_usecase import (  # noqa: E501
     MostRelevantArticlesUseCase,
 )
 

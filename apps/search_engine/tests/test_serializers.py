@@ -1,12 +1,11 @@
 import uuid
-from unittest.mock import Mock
 
 from django.test import RequestFactory, TestCase
 
 from apps.search_engine.domain.entities.affiliation import Affiliation
 from apps.search_engine.domain.entities.article import Article
 from apps.search_engine.domain.entities.author import Author
-from apps.search_engine.infrastructure.api.v1.serializers.affiliation_serializers import (
+from apps.search_engine.infrastructure.api.v1.serializers.affiliation_serializers import (  # noqa: E501
     AffiliationNameSerializer,
     AffiliationSerializer,
 )

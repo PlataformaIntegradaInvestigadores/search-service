@@ -24,7 +24,8 @@ class RetrieveScopusData:
             "query": "AFFIL(AFFILCOUNTRY(Ecuador))",
             "count": 25,
             "view": "COMPLETE",
-            "field": "dc:identifier,doi,dc:title,coverDate,dc:description,authkeywords,afid,affilname,"
+            "field": "dc:identifier,doi,dc:title,coverDate,dc:description,"
+            "authkeywords,afid,affilname,"
             "affiliation-city,affiliation-country,authid,authname,given-name,surname,initials",
             "cursor": "*",
         }
@@ -40,4 +41,4 @@ class RetrieveScopusData:
             response = self.retrieve_data()
             return response["search-results"]["opensearch:totalResults"]
         except Exception as e:
-            raise Exception(f"Error getting total articles from Scopus: {e}")
+            raise Exception(f"Error getting total articles from Scopus: {e}") from e

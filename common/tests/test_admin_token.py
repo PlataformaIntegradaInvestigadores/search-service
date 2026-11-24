@@ -53,7 +53,9 @@ class AdminTokenTests(SimpleTestCase):
             self.assertFalse(is_valid_admin_token(other))
 
     def test_token_expires(self):
-        with patch.dict(os.environ, {**CREDENTIALS, "ADMIN_TOKEN_MAX_AGE_SECONDS": "60"}):
+        with patch.dict(
+            os.environ, {**CREDENTIALS, "ADMIN_TOKEN_MAX_AGE_SECONDS": "60"}
+        ):
             token = issue_admin_token()
             self.assertTrue(is_valid_admin_token(token))
             with patch("django.core.signing.time.time", return_value=10**10):
@@ -135,7 +137,7 @@ class ProtectedEndpointsTests(SimpleTestCase):
     def test_admin_views_declare_the_permission_and_skip_basic_authentication(self):
         from django.urls import resolve
 
-        for method, path in PROTECTED:
+        for _method, path in PROTECTED:
             view = resolve(path).func
             cls = getattr(view, "cls", None) or view.view_class
             self.assertEqual(cls.permission_classes, [IsCentinelaAdmin], path)

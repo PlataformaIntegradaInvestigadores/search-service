@@ -3,7 +3,7 @@ pruebas), ModelGenerationService y ModelCorpusObserverService (mockeando
 todo acceso a disco: nunca deben tocar los archivos reales de
 resources/models o resources/corpus, que son de produccion)."""
 
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import mock_open, patch
 
 from django.test import SimpleTestCase, TestCase
 from neomodel import db
@@ -21,21 +21,23 @@ from apps.scopus_integration.application.services.model_generation_service impor
 
 class CorpusServiceTests(TestCase):
     def setUp(self):
-        db.cypher_query("MATCH (n) WHERE n:Author OR n:Article OR n:Topic DETACH DELETE n")
+        db.cypher_query(
+            "MATCH (n) WHERE n:Author OR n:Article OR n:Topic DETACH DELETE n"
+        )
 
     def tearDown(self):
-        db.cypher_query("MATCH (n) WHERE n:Author OR n:Article OR n:Topic DETACH DELETE n")
+        db.cypher_query(
+            "MATCH (n) WHERE n:Author OR n:Article OR n:Topic DETACH DELETE n"
+        )
 
     def test_get_corpus_by_author_agrupa_articulos_y_topicos(self):
-        db.cypher_query(
-            """
+        db.cypher_query("""
             CREATE (au:Author {scopus_id: "1"})
             CREATE (ar:Article {scopus_id: "10", title: "T", abstract: "A"})
             CREATE (to:Topic {name: "IA"})
             CREATE (au)-[:WROTE]->(ar)
             CREATE (ar)-[:USES]->(to)
-            """
-        )
+            """)
 
         result = CorpusService().get_corpus_by_author()
 
@@ -54,18 +56,16 @@ class CorpusServiceTests(TestCase):
 
         result = CorpusService().get_corpus_by_article()
 
-        self.assertEqual(result, [
-            {"scopus_id": "20", "title": "T2", "abstract": "A2", "topics": []}
-        ])
+        self.assertEqual(
+            result, [{"scopus_id": "20", "title": "T2", "abstract": "A2", "topics": []}]
+        )
 
     def test_get_combined_corpus_combina_autores_y_articulos(self):
-        db.cypher_query(
-            """
+        db.cypher_query("""
             CREATE (au:Author {scopus_id: "1"})
             CREATE (ar:Article {scopus_id: "10", title: "T", abstract: "A"})
             CREATE (au)-[:WROTE]->(ar)
-            """
-        )
+            """)
 
         combined = CorpusService().get_combined_corpus()
 
@@ -90,7 +90,9 @@ class CorpusServiceTests(TestCase):
 class ModelGenerationServiceTests(SimpleTestCase):
     def test_read_path_carga_pickle_desde_disco(self):
         with patch("builtins.open", mock_open(read_data=b"data")):
-            with patch("pickle.load", return_value={"preprocessed_doc": []}) as mock_load:
+            with patch(
+                "pickle.load", return_value={"preprocessed_doc": []}
+            ) as mock_load:
                 result = ModelGenerationService.read_path()
 
         mock_load.assert_called_once()
@@ -147,7 +149,9 @@ class ModelCorpusObserverServiceTests(SimpleTestCase):
     def test_construye_las_rutas_de_modelo_y_corpus(self):
         observer = ModelCorpusObserverService()
         self.assertEqual(observer.model_path, "resources/models/tf-idf/model-v10.0.pkl")
-        self.assertEqual(observer.corpus_path, "resources/corpus/corpus-tf-idf-v10.0.pkl")
+        self.assertEqual(
+            observer.corpus_path, "resources/corpus/corpus-tf-idf-v10.0.pkl"
+        )
 
     def test_verify_model_path_exists_usa_os_path_exists_mockeado(self):
         observer = ModelCorpusObserverService()

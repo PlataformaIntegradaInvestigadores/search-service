@@ -29,4 +29,4 @@ class TopicViewSet(viewsets.ViewSet):
             return Response({"topics": serializer.data}, status=status.HTTP_200_OK)
 
         except Exception as e:
-            raise Exception(f"Error: {e}")
+            raise Exception(f"Error: {e}") from e

@@ -120,9 +120,12 @@ class EtlAuthorsTests(SimpleTestCase):
         ]
         db = MagicMock()
 
-        with patch(f"{CMD}.extract_year", return_value=[]) as mock_extract, patch(
-            f"{CMD}.count_articles_per_year_author", return_value=[]
-        ) as mock_count:
+        with (
+            patch(f"{CMD}.extract_year", return_value=[]) as mock_extract,
+            patch(
+                f"{CMD}.count_articles_per_year_author", return_value=[]
+            ) as mock_count,
+        ):
             cmd._etl_authors(session, db, dry_run=False)
 
         mock_extract.assert_called_once_with([])
@@ -148,8 +151,9 @@ class EtlAuthorsTests(SimpleTestCase):
             )
         ]
 
-        with patch(f"{CMD}.extract_year", return_value=[2024]), patch(
-            f"{CMD}.count_articles_per_year_author", return_value=authors_data
+        with (
+            patch(f"{CMD}.extract_year", return_value=[2024]),
+            patch(f"{CMD}.count_articles_per_year_author", return_value=authors_data),
         ):
             result = cmd._etl_authors(session, db, dry_run=False)
 
@@ -166,8 +170,9 @@ class EtlAuthorsTests(SimpleTestCase):
         db = MagicMock()
         authors_data = [_author_entry("1", 1, [_year_entry(2024, 1)], [])]
 
-        with patch(f"{CMD}.extract_year", return_value=[2024]), patch(
-            f"{CMD}.count_articles_per_year_author", return_value=authors_data
+        with (
+            patch(f"{CMD}.extract_year", return_value=[2024]),
+            patch(f"{CMD}.count_articles_per_year_author", return_value=authors_data),
         ):
             cmd._etl_authors(session, db, dry_run=True)
 
@@ -204,8 +209,12 @@ class EtlAffiliationsTests(SimpleTestCase):
             }
         ]
 
-        with patch(f"{CMD}.extract_year", return_value=[2024]), patch(
-            f"{CMD}.count_articles_per_year_affiliation", return_value=affiliations_data
+        with (
+            patch(f"{CMD}.extract_year", return_value=[2024]),
+            patch(
+                f"{CMD}.count_articles_per_year_affiliation",
+                return_value=affiliations_data,
+            ),
         ):
             result = cmd._etl_affiliations(session, db, dry_run=False)
 
@@ -272,14 +281,16 @@ class EtlCountryTests(SimpleTestCase):
             "Acumulative": [{"name": "2024", "value": 1}],
         }
 
-        with patch(f"{CMD}.extract_year", return_value=[2024]), patch(
-            f"{CMD}.count_articles_per_year_country", return_value=country_raw
-        ), patch(f"{CMD}.get_articles_topics_info", return_value=articles_topics), patch(
-            f"{CMD}.get_authors_info", return_value=authors_info
-        ), patch(
-            f"{CMD}.get_affiliations_info", return_value=affiliations_info
+        with (
+            patch(f"{CMD}.extract_year", return_value=[2024]),
+            patch(f"{CMD}.count_articles_per_year_country", return_value=country_raw),
+            patch(f"{CMD}.get_articles_topics_info", return_value=articles_topics),
+            patch(f"{CMD}.get_authors_info", return_value=authors_info),
+            patch(f"{CMD}.get_affiliations_info", return_value=affiliations_info),
         ):
-            cmd._etl_country(session, db, dry_run=False, authors_data=[], affiliations_data=[])
+            cmd._etl_country(
+                session, db, dry_run=False, authors_data=[], affiliations_data=[]
+            )
 
         self.assertTrue(db.__getitem__.return_value.bulk_write.called)
 
@@ -289,7 +300,9 @@ class EtlCountryTests(SimpleTestCase):
         session = MagicMock()
         session.run.side_effect = RuntimeError("boom")
 
-        cmd._etl_country(session, MagicMock(), dry_run=False, authors_data=[], affiliations_data=[])
+        cmd._etl_country(
+            session, MagicMock(), dry_run=False, authors_data=[], affiliations_data=[]
+        )
 
 
 class EtlProvincesTests(SimpleTestCase):
@@ -320,9 +333,11 @@ class EtlProvincesTests(SimpleTestCase):
             }
         ]
 
-        with patch(f"{CMD}.extract_year", return_value=[2024]), patch(
-            f"{CMD}.process_affiliation_name", return_value="processed"
-        ), patch(f"{CMD}.count_province", return_value=provinces_data):
+        with (
+            patch(f"{CMD}.extract_year", return_value=[2024]),
+            patch(f"{CMD}.process_affiliation_name", return_value="processed"),
+            patch(f"{CMD}.count_province", return_value=provinces_data),
+        ):
             cmd._etl_provinces(session, db, dry_run=False)
 
         self.assertTrue(db.__getitem__.return_value.bulk_write.called)
@@ -343,9 +358,11 @@ class EtlProvincesTests(SimpleTestCase):
         ]
         db = MagicMock()
 
-        with patch(f"{CMD}.extract_year", return_value=[]) as mock_extract, patch(
-            f"{CMD}.process_affiliation_name", return_value="processed"
-        ), patch(f"{CMD}.count_province", return_value=[]):
+        with (
+            patch(f"{CMD}.extract_year", return_value=[]) as mock_extract,
+            patch(f"{CMD}.process_affiliation_name", return_value="processed"),
+            patch(f"{CMD}.count_province", return_value=[]),
+        ):
             cmd._etl_provinces(session, db, dry_run=False)
 
         mock_extract.assert_called_once_with([])
@@ -404,8 +421,9 @@ class HandleOrchestrationTests(SimpleTestCase):
 
     def test_neo4j_no_disponible_cierra_mongo_y_retorna(self):
         mongo_client = MagicMock()
-        with patch(f"{CMD}.Command._connect_mongo", return_value=mongo_client), patch(
-            f"{CMD}.Command._connect_neo4j", return_value=None
+        with (
+            patch(f"{CMD}.Command._connect_mongo", return_value=mongo_client),
+            patch(f"{CMD}.Command._connect_neo4j", return_value=None),
         ):
             call_command("upsert_mongo")
 
@@ -417,17 +435,15 @@ class HandleOrchestrationTests(SimpleTestCase):
         session_cm = MagicMock()
         neo4j_driver.session.return_value.__enter__.return_value = session_cm
 
-        with patch(f"{CMD}.Command._connect_mongo", return_value=mongo_client), patch(
-            f"{CMD}.Command._connect_neo4j", return_value=neo4j_driver
-        ), patch(f"{CMD}.Command._ensure_indexes") as mock_indexes, patch(
-            f"{CMD}.Command._etl_authors", return_value=[]
-        ) as mock_authors, patch(
-            f"{CMD}.Command._etl_affiliations", return_value=[]
-        ) as mock_affils, patch(
-            f"{CMD}.Command._etl_country"
-        ) as mock_country, patch(
-            f"{CMD}.Command._etl_provinces"
-        ) as mock_provinces:
+        with (
+            patch(f"{CMD}.Command._connect_mongo", return_value=mongo_client),
+            patch(f"{CMD}.Command._connect_neo4j", return_value=neo4j_driver),
+            patch(f"{CMD}.Command._ensure_indexes") as mock_indexes,
+            patch(f"{CMD}.Command._etl_authors", return_value=[]) as mock_authors,
+            patch(f"{CMD}.Command._etl_affiliations", return_value=[]) as mock_affils,
+            patch(f"{CMD}.Command._etl_country") as mock_country,
+            patch(f"{CMD}.Command._etl_provinces") as mock_provinces,
+        ):
             call_command("upsert_mongo")
 
         mock_indexes.assert_called_once()
@@ -443,13 +459,15 @@ class HandleOrchestrationTests(SimpleTestCase):
         neo4j_driver = MagicMock()
         neo4j_driver.session.return_value.__enter__.return_value = MagicMock()
 
-        with patch(f"{CMD}.Command._connect_mongo", return_value=mongo_client), patch(
-            f"{CMD}.Command._connect_neo4j", return_value=neo4j_driver
-        ), patch(f"{CMD}.Command._ensure_indexes") as mock_indexes, patch(
-            f"{CMD}.Command._etl_authors", return_value=[]
-        ), patch(f"{CMD}.Command._etl_affiliations", return_value=[]), patch(
-            f"{CMD}.Command._etl_country"
-        ), patch(f"{CMD}.Command._etl_provinces"):
+        with (
+            patch(f"{CMD}.Command._connect_mongo", return_value=mongo_client),
+            patch(f"{CMD}.Command._connect_neo4j", return_value=neo4j_driver),
+            patch(f"{CMD}.Command._ensure_indexes") as mock_indexes,
+            patch(f"{CMD}.Command._etl_authors", return_value=[]),
+            patch(f"{CMD}.Command._etl_affiliations", return_value=[]),
+            patch(f"{CMD}.Command._etl_country"),
+            patch(f"{CMD}.Command._etl_provinces"),
+        ):
             call_command("upsert_mongo", "--skip-indexes")
 
         mock_indexes.assert_not_called()
@@ -459,10 +477,11 @@ class HandleOrchestrationTests(SimpleTestCase):
         neo4j_driver = MagicMock()
         neo4j_driver.session.return_value.__enter__.return_value = MagicMock()
 
-        with patch(f"{CMD}.Command._connect_mongo", return_value=mongo_client), patch(
-            f"{CMD}.Command._connect_neo4j", return_value=neo4j_driver
-        ), patch(f"{CMD}.Command._ensure_indexes"), patch(
-            f"{CMD}.Command._etl_authors", side_effect=RuntimeError("boom")
+        with (
+            patch(f"{CMD}.Command._connect_mongo", return_value=mongo_client),
+            patch(f"{CMD}.Command._connect_neo4j", return_value=neo4j_driver),
+            patch(f"{CMD}.Command._ensure_indexes"),
+            patch(f"{CMD}.Command._etl_authors", side_effect=RuntimeError("boom")),
         ):
             call_command("upsert_mongo", "--dry-run")
 

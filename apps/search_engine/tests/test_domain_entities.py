@@ -6,7 +6,6 @@ from django.test import TestCase
 from apps.search_engine.domain.entities.affiliation import Affiliation
 from apps.search_engine.domain.entities.article import Article
 from apps.search_engine.domain.entities.author import Author
-from apps.search_engine.domain.entities.topic import Topic
 
 
 def uid():
@@ -33,10 +32,20 @@ class AffiliationFromDictTests(TestCase):
         afid = uid()
         name = f"Uni {uid()}"
         first = Affiliation.from_dict(
-            {"afid": afid, "affilname": name, "affiliation-city": "A", "affiliation-country": "B"}
+            {
+                "afid": afid,
+                "affilname": name,
+                "affiliation-city": "A",
+                "affiliation-country": "B",
+            }
         )
         again = Affiliation.from_dict(
-            {"afid": afid, "affilname": name, "affiliation-city": "A", "affiliation-country": "B"}
+            {
+                "afid": afid,
+                "affilname": name,
+                "affiliation-city": "A",
+                "affiliation-country": "B",
+            }
         )
         self.assertEqual(first.scopus_id, again.scopus_id)
 
@@ -149,8 +158,12 @@ class AuthorFromDictTests(TestCase):
 
     def test_returns_existing_author(self):
         authid = uid()
-        first = Author.from_dict({"authid": authid, "given-name": "Ana", "surname": "P"})
-        again = Author.from_dict({"authid": authid, "given-name": "Ignored", "surname": "P"})
+        first = Author.from_dict(
+            {"authid": authid, "given-name": "Ana", "surname": "P"}
+        )
+        again = Author.from_dict(
+            {"authid": authid, "given-name": "Ignored", "surname": "P"}
+        )
         self.assertEqual(first.scopus_id, again.scopus_id)
         self.assertEqual(again.first_name, "Ana")
 
@@ -179,7 +192,7 @@ class AuthorUpdateFromJsonTests(TestCase):
 
     def test_updates_existing_author_basic_fields(self):
         author_id = nid()
-        author = Author(scopus_id=author_id, first_name="Old", last_name="Old").save()
+        Author(scopus_id=author_id, first_name="Old", last_name="Old").save()
         updated = Author.update_from_json(
             {
                 "coredata": {
@@ -214,7 +227,7 @@ class AuthorUpdateFromJsonTests(TestCase):
 
     def test_updates_with_affiliation_current_as_list_and_afdispname_fallback(self):
         author_id = nid()
-        author = Author(scopus_id=author_id, first_name="Old", last_name="Old").save()
+        Author(scopus_id=author_id, first_name="Old", last_name="Old").save()
         updated = Author.update_from_json(
             {
                 "coredata": {"dc:identifier": f"AUTHOR_ID:{author_id}"},
@@ -245,7 +258,7 @@ class AuthorUpdateFromJsonTests(TestCase):
 
     def test_wraps_unexpected_errors_as_value_error(self):
         author_id = nid()
-        author = Author(scopus_id=author_id, first_name="Old", last_name="Old").save()
+        Author(scopus_id=author_id, first_name="Old", last_name="Old").save()
         with self.assertRaises(ValueError):
             Author.update_from_json(
                 {

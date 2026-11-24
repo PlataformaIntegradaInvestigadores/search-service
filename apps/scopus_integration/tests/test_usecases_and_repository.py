@@ -16,7 +16,7 @@ from apps.scopus_integration.application.usecases.generate_corpus_usecase import
 from apps.scopus_integration.application.usecases.scopus_integration_usecase import (
     ScopusIntegrationUseCase,
 )
-from apps.scopus_integration.application.usecases.update_author_information_usecase import (
+from apps.scopus_integration.application.usecases.update_author_information_usecase import (  # noqa: E501
     UpdateAuthorInformationUseCase,
 )
 from apps.scopus_integration.domain.entities.cursor_reference import CursorReference
@@ -174,13 +174,16 @@ class UpdateAuthorInformationUseCaseTests(SimpleTestCase):
         author_repository.authors_no_updated.return_value = [author1, author2]
         client = MagicMock()
 
-        with patch(
-            "apps.scopus_integration.application.usecases."
-            "update_author_information_usecase.AuthorRetrieval"
-        ) as mock_retrieval_cls, patch(
-            "apps.scopus_integration.application.usecases."
-            "update_author_information_usecase.Author"
-        ) as mock_author:
+        with (
+            patch(
+                "apps.scopus_integration.application.usecases."
+                "update_author_information_usecase.AuthorRetrieval"
+            ) as mock_retrieval_cls,
+            patch(
+                "apps.scopus_integration.application.usecases."
+                "update_author_information_usecase.Author"
+            ) as mock_author,
+        ):
             mock_retrieval = MagicMock()
             mock_retrieval.result = [{"coredata": {}}]
             mock_retrieval_cls.return_value = mock_retrieval
@@ -264,5 +267,5 @@ class GenerateCorpusUseCaseTests(SimpleTestCase):
         corpus_service.get_combined_corpus.side_effect = RuntimeError("boom")
 
         usecase = GenerateCorpusUseCase(corpus_service=corpus_service)
-        with self.assertRaises(Exception):
+        with self.assertRaisesRegex(Exception, "boom"):
             usecase.execute()

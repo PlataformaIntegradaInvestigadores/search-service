@@ -9,13 +9,13 @@ from django.test import SimpleTestCase
 from apps.scopus_integration.utils.utils import (
     affiliation_to_scopus_search,
     article_retrieval_to_scopus_search,
-    authorkeywords_to_scopus_search,
     author_to_scopus_search,
+    authorkeywords_to_scopus_search,
     chunker,
     encodeFacets,
-    recastDfAffiliations,
     recast_df_articles,
     recast_df_authors,
+    recastDfAffiliations,
     rewrite_article_affil_list,
     rewrite_article_authors,
 )
@@ -201,9 +201,7 @@ class AffiliationToScopusSearchTests(SimpleTestCase):
         self.assertEqual(result[0]["affilname"], "ESPOL")
 
     def test_campos_faltantes_asumen_nan(self):
-        affils = [
-            {"@href": "http://x", "@id": "1", "affiliation-country": "Ecuador"}
-        ]
+        affils = [{"@href": "http://x", "@id": "1", "affiliation-country": "Ecuador"}]
         result = affiliation_to_scopus_search(affils)
         self.assertTrue(np.isnan(result[0]["affilname"]))
         self.assertTrue(np.isnan(result[0]["affiliation-city"]))

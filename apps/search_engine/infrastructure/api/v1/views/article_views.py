@@ -14,7 +14,7 @@ from apps.search_engine.application.usecases.article.article_by_id_usecase impor
 from apps.search_engine.application.usecases.article.list_all_articles_usecase import (
     ListAllArticlesUseCase,
 )
-from apps.search_engine.application.usecases.article.most_relevant_articles_by_topic_usecase import (
+from apps.search_engine.application.usecases.article.most_relevant_articles_by_topic_usecase import (  # noqa: E501
     MostRelevantArticlesUseCase,
 )
 from apps.search_engine.application.usecases.article.total_articles_usecase import (

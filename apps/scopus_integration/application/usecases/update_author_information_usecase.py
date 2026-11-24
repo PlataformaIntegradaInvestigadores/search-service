@@ -52,10 +52,10 @@ class UpdateAuthorInformationUseCase:
                         print(f"Error updating author {author_instance.scopus_id}: {e}")
                         raise Exception(
                             f"Error updating author {author_instance.scopus_id}: {e}"
-                        )
+                        ) from e
 
             return total_authors
         except requests.HTTPError as e:
             raise e
         except Exception as e:
-            raise Exception("Error during execution: " + str(e))
+            raise Exception("Error during execution: " + str(e)) from e

@@ -76,7 +76,7 @@ class AuthorCypherParametersTests(SimpleTestCase):
 
     def test_pagination_must_be_numeric(self):
         with patch(f"{SERVICES}.author_service.db.cypher_query") as query:
-            with self.assertRaises(Exception):
+            with self.assertRaisesRegex(Exception, "Error finding all authors"):
                 self.service.find_all(page_size="5; MATCH (n) DELETE n", page=2)
         query.assert_not_called()
 

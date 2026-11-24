@@ -5,7 +5,7 @@ from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 
-from apps.scopus_integration.infrastructure.api.v1.serializers.logger_request_serializer import (
+from apps.scopus_integration.infrastructure.api.v1.serializers.logger_request_serializer import (  # noqa: E501
     LoggerRequestSerializer,
 )
 from common.admin_permission import IsCentinelaAdmin

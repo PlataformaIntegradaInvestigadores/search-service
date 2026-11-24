@@ -8,12 +8,15 @@ from apps.search_engine.domain.repositories.article_repository import ArticleRep
 class ArticleService(ArticleRepository):
     def find_articles_by_author(self, author_id: str) -> list[object]:
         try:
-            query = "MATCH (a:Article)-[:WROTE]-(au:Author) WHERE au.scopus_id = $author_id RETURN a"
+            query = (
+                "MATCH (a:Article)-[:WROTE]-(au:Author) WHERE au.scopus_id = "
+                "$author_id RETURN a"
+            )
             results, meta = db.cypher_query(query, {"author_id": author_id})
             articles = [Article.inflate(row[0]) for row in results]
             return articles
         except Exception as e:
-            raise Exception(f"Error finding articles by author: {e}")
+            raise Exception(f"Error finding articles by author: {e}") from e
 
     def articles_count(self) -> int:
         try:
@@ -22,7 +25,7 @@ class ArticleService(ArticleRepository):
             total_articles = results[0][0]
             return total_articles
         except Exception as e:
-            raise ValueError(f"Error finding total articles: {e}")
+            raise ValueError(f"Error finding total articles: {e}") from e
 
     def find_articles_by_ids(
         self,
@@ -83,16 +86,19 @@ class ArticleService(ArticleRepository):
 
             return articles, total_articles
         except Exception as e:
-            raise Exception(f"Error finding articles by ids: {e}")
+            raise Exception(f"Error finding articles by ids: {e}") from e
 
     # En article_service.py
     def find_most_relevant_articles_by_topic(self, topic: str):
         try:
             m = Model("article")
-            # Devuelve un Series/DataFrame con scopus_id y score sin hacer N+1 queries a la BD
+            # Devuelve un Series/DataFrame con scopus_id y score sin hacer N+1 queries a
+            # la BD
             return m.get_most_relevant_docs_by_topic_v2(topic, None)
         except Exception as e:
-            raise Exception(f"Error finding most relevant articles by topic: {e}")
+            raise Exception(
+                f"Error finding most relevant articles by topic: {e}"
+            ) from e
 
     def find_articles_by_filter_years(
         self, filter_type: str, filter_years: list[str], ids: list[str]
@@ -124,7 +130,7 @@ class ArticleService(ArticleRepository):
             articles = [Article.inflate(row[0]) for row in results]
             return articles
         except Exception as e:
-            raise Exception(f"Error finding articles by filter years: {e}")
+            raise Exception(f"Error finding articles by filter years: {e}") from e
 
     def find_years_by_articles(self, ids: list[str]) -> list[object]:
         try:
@@ -137,13 +143,13 @@ class ArticleService(ArticleRepository):
                 years.append(article.publication_date)
             return years
         except Exception as e:
-            raise Exception(f"Error getting years by articles: {e}")
+            raise Exception(f"Error getting years by articles: {e}") from e
 
     def bulk_create(self, articles: list[dict]) -> list[Article]:
         try:
             return Article.get_or_create(*articles)
         except Exception as e:
-            raise ValueError(f"Error creating articles: {e}")
+            raise ValueError(f"Error creating articles: {e}") from e
 
     def find_total_articles(self) -> int:
         try:
@@ -152,7 +158,7 @@ class ArticleService(ArticleRepository):
             total_articles = results[0][0]
             return total_articles
         except Exception as e:
-            raise ValueError(f"Error finding total articles: {e}")
+            raise ValueError(f"Error finding total articles: {e}") from e
 
     def find_all(self, page_number=1, page_size=10) -> list[Article]:
         try:
@@ -164,14 +170,14 @@ class ArticleService(ArticleRepository):
             articles = [Article.inflate(row[0]) for row in results]
             return articles
         except Exception as e:
-            raise Exception(f"Error finding all articles: {e}")
+            raise Exception(f"Error finding all articles: {e}") from e
 
     def update(self, article: dict) -> Article:
         try:
             articles = Article.create_or_update(article)
             return articles[0]
         except Exception as e:
-            raise Exception(f"Error updating article: {e}")
+            raise Exception(f"Error updating article: {e}") from e
 
     def save(self, article) -> Article:
         try:
@@ -179,14 +185,14 @@ class ArticleService(ArticleRepository):
             article.save()
             return article
         except Exception as e:
-            raise Exception(f"Error saving article: {e}")
+            raise Exception(f"Error saving article: {e}") from e
 
     def find_by_id(self, article_id) -> Article | None:
         try:
             article = Article.nodes.get_or_none(scopus_id=article_id)
             return article
         except Exception as e:
-            raise Exception(f"Error finding article by id: {e}")
+            raise Exception(f"Error finding article by id: {e}") from e
 
     def find_authors_by_article(self, article_id: str) -> list[object]:
         try:
@@ -199,4 +205,4 @@ class ArticleService(ArticleRepository):
             authors = [row[0] for row in results]
             return authors
         except Exception as e:
-            raise Exception(f"Error finding authors by article: {e}")
+            raise Exception(f"Error finding authors by article: {e}") from e

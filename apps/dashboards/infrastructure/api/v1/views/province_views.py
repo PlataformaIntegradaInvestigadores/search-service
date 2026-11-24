@@ -11,7 +11,7 @@ from apps.dashboards.application.use_cases.get_provinces_acumulated_year import 
 from apps.dashboards.application.use_cases.get_provinces_year_use_case import (
     ProvincesYearUseCase,
 )
-from apps.dashboards.infrastructure.api.v1.serializers.province_acumulated_serializer import (
+from apps.dashboards.infrastructure.api.v1.serializers.province_acumulated_serializer import (  # noqa: E501
     ProvinceAcumulatedSerializer,
 )
 from apps.dashboards.infrastructure.api.v1.serializers.province_serializer import (
@@ -100,4 +100,3 @@ class ProvinceViews(viewsets.ModelViewSet):
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-

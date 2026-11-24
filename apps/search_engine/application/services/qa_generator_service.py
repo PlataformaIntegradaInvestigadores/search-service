@@ -1,9 +1,9 @@
 import os
-import time
 import re
+import time
+
 import ollama
 from pydantic import BaseModel
-from typing import List, Dict, Tuple
 
 DEFAULT_OLLAMA_HOST = "http://127.0.0.1:11434"
 DEFAULT_QA_MODEL = "qwen2.5:1.5b"
@@ -16,6 +16,7 @@ def _ollama_client() -> ollama.Client:
 
 def _qa_model_name() -> str:
     return os.environ.get("OLLAMA_QA_MODEL", DEFAULT_QA_MODEL)
+
 
 # =====================================================================
 # 1. ESQUEMAS DE RESPUESTA
@@ -31,13 +32,14 @@ class GenerationLatency(BaseModel):
 
 class QAGenerationResult(BaseModel):
     query: str
-    processed_docs: List[Dict]
+    processed_docs: list[dict]
     initial_raw_response: str
     final_raw_response: str
     intentos_utilizados: int
     status: str
     latency: GenerationLatency
-    qa_pairs: List[Dict[str, str]] = []
+    qa_pairs: list[dict[str, str]] = []
+
 
 # =====================================================================
 # 2. COMPONENTES DEL GENERADOR
@@ -48,14 +50,15 @@ class ContextCompressor:
         self.temperature = temperature
         self._client = _ollama_client()
 
-    def compress(self, query: str, docs: List[Dict]) -> Tuple[List[Dict], float]:
+    def compress(self, query: str, docs: list[dict]) -> tuple[list[dict], float]:
         compressed_docs = []
         t_start = time.time()
-        
+
         for doc in docs:
-            # Soporta tanto el formato del script RAG antiguo ('text') como el del nuevo Retriever ('abstract' o 'content')
-            original_text = doc.get('text', doc.get('abstract', doc.get('content', '')))
-            
+            # Soporta tanto el formato del script RAG antiguo ('text') como el del
+            # nuevo Retriever ('abstract' o 'content').
+            original_text = doc.get("text", doc.get("abstract", doc.get("content", "")))
+
             prompt = f"""Actúa como un asistente de investigación científico. 
 Tu tarea es leer el siguiente abstract en inglés y extraer SOLO la información útil para responder a la búsqueda del usuario.
 
@@ -67,33 +70,37 @@ INSTRUCCIONES:
 2. Escribe el resumen en ESPAÑOL, pero MANTÉN TODOS LOS TÉRMINOS TÉCNICOS, algoritmos y métricas en su idioma ORIGINAL (INGLÉS).
 3. Ve directo al grano, sin introducciones.
 
-Resumen estructurado:"""
+Resumen estructurado:"""  # noqa: E501
             try:
                 res = self._client.chat(
                     model=self.slm_model,
                     messages=[{"role": "user", "content": prompt}],
-                    options={"temperature": self.temperature, "num_predict": 200}
+                    options={"temperature": self.temperature, "num_predict": 200},
                 )
                 compressed_text = res["message"]["content"].strip()
             except Exception:
-                compressed_text = original_text 
-            
+                compressed_text = original_text
+
             comp_doc = doc.copy()
             # Estandarizamos la salida para que el generador siempre lea 'text'
             comp_doc["text"] = compressed_text
             compressed_docs.append(comp_doc)
-            
+
         t_total = (time.time() - t_start) * 1000
         return compressed_docs, t_total
+
 
 class AcademicQAGenerator:
     # EL PROMPT EXACTO PROBADO CON PROTEGI
     SYSTEM_PROMPT = (
         "Analiza y sintetiza todos los documentos proporcionados. "
-        "Genera exactamente 3 pares de preguntas y respuestas técnicas, diversas y rigurosas en español, "
-        "incluyendo datos cuantitativos y términos clave. No alucines. Responde únicamente con 3 bloques XML: "
+        "Genera exactamente 3 pares de preguntas y respuestas técnicas, diversas y "
+        "rigurosas en español, "
+        "incluyendo datos cuantitativos y términos clave. No alucines. Responde "
+        "únicamente con 3 bloques XML: "
         "<pregunta>Pregunta</pregunta><respuesta>Respuesta</respuesta>. "
-        "Prohibido añadir texto plano, introducciones o formatos fuera de las etiquetas XML."
+        "Prohibido añadir texto plano, introducciones o formatos fuera de las "
+        "etiquetas XML."
     )
 
     def __init__(self, slm_model: str | None = None, temperature: float = 0.0):
@@ -101,12 +108,12 @@ class AcademicQAGenerator:
         self.temperature = temperature
         self._client = _ollama_client()
 
-    def _format_context(self, documents: List[Dict]) -> str:
+    def _format_context(self, documents: list[dict]) -> str:
         formatted = []
         for d in documents:
-            doc_id = d.get('doc_id', d.get('id', d.get('article_id', 'N/A')))
-            title = d.get('title', 'Sin título')
-            text = d.get('text', d.get('abstract', d.get('content', '')))
+            doc_id = d.get("doc_id", d.get("id", d.get("article_id", "N/A")))
+            title = d.get("title", "Sin título")
+            text = d.get("text", d.get("abstract", d.get("content", "")))
             formatted.append(f"Doc {doc_id}: {title} | {text}")
         return "\n\n".join(formatted)
 
@@ -133,14 +140,22 @@ class AcademicQAGenerator:
         # <pregunta>contenido<respuesta> sin </pregunta>
         texto = re.sub(
             r"(<pregunta>)(.*?)(?=<respuesta>)",
-            lambda m: m.group(0) if "</pregunta>" in m.group(2) else f"{m.group(1)}{m.group(2)}</pregunta>",
+            lambda m: (
+                m.group(0)
+                if "</pregunta>" in m.group(2)
+                else f"{m.group(1)}{m.group(2)}</pregunta>"
+            ),
             texto,
             flags=re.DOTALL,
         )
         # <respuesta>contenido<pregunta> (o EOF) sin </respuesta>
         texto = re.sub(
             r"(<respuesta>)(.*?)(?=<pregunta>|$)",
-            lambda m: m.group(0) if "</respuesta>" in m.group(2) else f"{m.group(1)}{m.group(2)}</respuesta>",
+            lambda m: (
+                m.group(0)
+                if "</respuesta>" in m.group(2)
+                else f"{m.group(1)}{m.group(2)}</respuesta>"
+            ),
             texto,
             flags=re.DOTALL,
         )
@@ -156,14 +171,14 @@ class AcademicQAGenerator:
         return texto
 
     @staticmethod
-    def _pair_to_xml(pair: Dict[str, str]) -> str:
+    def _pair_to_xml(pair: dict[str, str]) -> str:
         return (
             f"<pregunta>{pair['question']}</pregunta>"
             f"<respuesta>{pair['answer']}</respuesta>"
         )
 
     @classmethod
-    def _pairs_to_xml(cls, pairs: List[Dict[str, str]]) -> str:
+    def _pairs_to_xml(cls, pairs: list[dict[str, str]]) -> str:
         return "".join(cls._pair_to_xml(p) for p in pairs)
 
     @staticmethod
@@ -172,7 +187,7 @@ class AcademicQAGenerator:
 
     def _evaluar_respuesta(
         self, texto: str
-    ) -> Tuple[List[Dict[str, str]], List[Dict[str, str]], str, str]:
+    ) -> tuple[list[dict[str, str]], list[dict[str, str]], str, str]:
         """
         Separa pares válidos de inválidos.
 
@@ -220,8 +235,8 @@ class AcademicQAGenerator:
             r"<respuesta>(.*?)</respuesta>", texto, flags=re.DOTALL | re.IGNORECASE
         )
 
-        valid_pairs: List[Dict[str, str]] = []
-        failed_pairs: List[Dict[str, str]] = []
+        valid_pairs: list[dict[str, str]] = []
+        failed_pairs: list[dict[str, str]] = []
         paired = min(len(preguntas), len(respuestas))
         for i in range(paired):
             question = preguntas[i].strip()
@@ -250,7 +265,7 @@ class AcademicQAGenerator:
 
         return valid_pairs, failed_pairs, diagnosis, texto
 
-    def _diagnosticar_fallo(self, texto: str) -> Tuple[bool, str, str]:
+    def _diagnosticar_fallo(self, texto: str) -> tuple[bool, str, str]:
         """Compat: True solo si hay exactamente EXPECTED_QA_PAIRS pares válidos."""
         valid, failed, msg, repaired = self._evaluar_respuesta(texto)
         completo = len(valid) >= EXPECTED_QA_PAIRS and not failed
@@ -272,12 +287,13 @@ class AcademicQAGenerator:
             "diversas y rigurosas en español, incluyendo datos cuantitativos y "
             "términos clave. No alucines. Responde únicamente con bloques XML: "
             "<pregunta>Pregunta</pregunta><respuesta>Respuesta</respuesta>. "
-            "Prohibido añadir texto plano, introducciones o formatos fuera de las etiquetas XML."
+            "Prohibido añadir texto plano, introducciones o formatos fuera de las "
+            "etiquetas XML."
         )
 
     def _build_correction_prompt(
         self,
-        failed_pairs: List[Dict[str, str]],
+        failed_pairs: list[dict[str, str]],
         missing: int,
         diagnosis: str,
         last_raw: str,
@@ -298,8 +314,8 @@ class AcademicQAGenerator:
         )
 
     def generate(
-        self, user_query: str, retrieved_docs: List[Dict], use_iterative: bool
-    ) -> Tuple[str, str, int, float, str, List[Dict[str, str]]]:
+        self, user_query: str, retrieved_docs: list[dict], use_iterative: bool
+    ) -> tuple[str, str, int, float, str, list[dict[str, str]]]:
         docs_context = self._format_context(retrieved_docs)
 
         user_content = (
@@ -312,8 +328,8 @@ class AcademicQAGenerator:
         t0 = time.time()
         initial_raw = ""
         current_raw = ""
-        saved_pairs: List[Dict[str, str]] = []
-        failed_pairs: List[Dict[str, str]] = []
+        saved_pairs: list[dict[str, str]] = []
+        failed_pairs: list[dict[str, str]] = []
         diagnosis = ""
         status = "success"
         intentos = 0
@@ -328,9 +344,7 @@ class AcademicQAGenerator:
                     messages = [
                         {
                             "role": "system",
-                            "content": self._system_prompt_for_count(
-                                EXPECTED_QA_PAIRS
-                            ),
+                            "content": self._system_prompt_for_count(EXPECTED_QA_PAIRS),
                         },
                         {"role": "user", "content": user_content},
                     ]
@@ -357,11 +371,11 @@ class AcademicQAGenerator:
                 if intentos == 1:
                     initial_raw = current_raw
 
-                new_valid, failed_pairs, diagnosis, current_raw = self._evaluar_respuesta(
-                    current_raw
+                new_valid, failed_pairs, diagnosis, current_raw = (
+                    self._evaluar_respuesta(current_raw)
                 )
 
-                # Conserva pares válidos hasta completar el cupo de 3 (sin duplicar pregunta)
+                # Conserva pares válidos hasta completar el cupo de 3 (sin duplicar pregunta)  # noqa: E501
                 seen_questions = {p["question"].casefold() for p in saved_pairs}
                 for pair in new_valid:
                     if len(saved_pairs) >= EXPECTED_QA_PAIRS:
@@ -420,20 +434,28 @@ class QAGenerationPipeline:
         self.compressor = ContextCompressor(slm_model=resolved)
         self.generator = AcademicQAGenerator(slm_model=resolved)
 
-    def process(self, query: str, retrieved_docs: List[Dict], use_compression: bool = True, use_iterative: bool = True) -> QAGenerationResult:
+    def process(
+        self,
+        query: str,
+        retrieved_docs: list[dict],
+        use_compression: bool = True,
+        use_iterative: bool = True,
+    ) -> QAGenerationResult:
         """
         Recibe la query original y la lista de documentos recuperados (top_k).
         Ejecuta la compresión (opcional) y la generación iterativa.
         """
         t_start = time.time()
-        
+
         # 1. Compresión Opcional
         if use_compression:
-            docs_to_generate, comp_lat_ms = self.compressor.compress(query, retrieved_docs)
+            docs_to_generate, comp_lat_ms = self.compressor.compress(
+                query, retrieved_docs
+            )
         else:
             docs_to_generate = retrieved_docs
             comp_lat_ms = 0.0
-            
+
         # 2. Generación (con o sin iteración)
         (
             initial_raw,
@@ -447,13 +469,13 @@ class QAGenerationPipeline:
             retrieved_docs=docs_to_generate,
             use_iterative=use_iterative,
         )
-        
+
         t_total_ms = (time.time() - t_start) * 1000
 
         latency = GenerationLatency(
             compression_ms=round(comp_lat_ms, 2),
             generation_ms=round(gen_lat_ms, 2),
-            total_generator_ms=round(t_total_ms, 2)
+            total_generator_ms=round(t_total_ms, 2),
         )
 
         return QAGenerationResult(
@@ -468,7 +490,7 @@ class QAGenerationPipeline:
         )
 
 
-def parse_qa_pairs(raw_response: str) -> List[Dict[str, str]]:
+def parse_qa_pairs(raw_response: str) -> list[dict[str, str]]:
     """Extract question/answer pairs from generator XML output."""
     if not raw_response:
         return []
@@ -489,9 +511,9 @@ def parse_qa_pairs(raw_response: str) -> List[Dict[str, str]]:
     return pairs
 
 
-def normalize_docs_for_qa(documents: List[Dict], limit: int = 3) -> List[Dict]:
+def normalize_docs_for_qa(documents: list[dict], limit: int = 3) -> list[dict]:
     """Map search-hit fields into the shape expected by QAGenerationPipeline."""
-    normalized: List[Dict] = []
+    normalized: list[dict] = []
     for doc in documents[:limit]:
         normalized.append(
             {
@@ -522,13 +544,19 @@ if __name__ == "__main__":
         {
             "article_id": "123",
             "title": "Quantum Cryptography Advancements",
-            "abstract": "This paper discusses how Shor's algorithm impacts RSA encryption and introduces QKD protocols."
+            "abstract": (
+                "This paper discusses how Shor's algorithm impacts RSA encryption and "
+                "introduces QKD protocols."
+            ),
         },
         {
             "article_id": "124",
             "title": "Post-Quantum Security",
-            "abstract": "An overview of lattice-based cryptography to defend against quantum attacks."
-        }
+            "abstract": (
+                "An overview of lattice-based cryptography to defend against quantum "
+                "attacks."
+            ),
+        },
     ]
 
     # Inicializas el pipeline una sola vez
@@ -540,7 +568,7 @@ if __name__ == "__main__":
         query=dummy_query,
         retrieved_docs=dummy_retrieved_docs,
         use_compression=True,
-        use_iterative=True
+        use_iterative=True,
     )
 
     print("\n--- RESULTADO FINAL ---")
